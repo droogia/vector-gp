@@ -16,7 +16,7 @@ Online: https://droogia.github.io/vector-gp/
    location, 2026 round or F1 years, length, direction, race distance).
 2. In the box, set laps (1, 3, 5, 10), AI level (Rookie, Normal, Pro) and camera (Fixed,
    Chase). Left/Right move to the previous/next circuit; Esc goes back to the list.
-   About 2 seconds after a circuit is highlighted, its music starts (see below).
+   About a second after a circuit is highlighted, its music starts (see below).
 3. **Start** or Enter starts the race. Wait for the five lights to go out. You start from
    the back of the grid.
 
@@ -30,7 +30,8 @@ moving the selection:
 | F / C | Camera Fixed / Chase |
 | O | Options |
 | H | Help (keys; the race stats stay empty) |
-| V | Music and sound on/off |
+| T | Circuit music on/off |
+| V | All sound on/off |
 
 In the race:
 
@@ -88,14 +89,16 @@ are not stored: the HUD and the help box show this race's last, best and fastest
 
 ## Music
 
-In the menu, the highlighted circuit's music plays after about 2 seconds: the opening phrase,
-looped, as a chiptune (square-wave melody, triangle bass), written note by note in
+In the menu, the highlighted circuit's music plays after about a second: an opening section
+of at least 15 seconds, looped, as a chiptune (square-wave melody, triangle bass), written note by note in
 `vector-gp.html` (`SCORES`). Browsers allow sound only after the first click or key press.
-V turns it off.
+T turns the music off (V turns off all sound).
 
 National anthems are used where the music is in the public domain (published before 1929).
 Elsewhere the circuit gets a public-domain piece or an original theme in the style of the
-region. The melodies were written from memory, so some may differ from the originals.
+region. The melodies were written from memory, so some may differ from the originals; Il Canto
+degli Italiani (Inno di Mameli) is transcribed from a score, from "Fratelli d'Italia" to the
+end of the verse.
 
 | Music | Circuits |
 |---|---|
