@@ -8,21 +8,25 @@ const plain = o => JSON.parse(JSON.stringify(o));   // objects from the game's s
 
 test('URL code: readable round trip for every option', () => {
   for (const track of ['AUS', 'MON', 'IMO']) for (const laps of [1, 3, 5, 10]) for (const diff of ['ROOKIE', 'NORMAL', 'PRO'])
-    for (const cam of ['FIXED', 'CHASE']) for (let steer = 1; steer <= 5; steer++) for (const brake of [1, 5]) for (const zoom of [1, 7]) {
-      const o = { track, laps, diff, cam, steer, brake, zoom };
+    for (const cam of ['FIXED', 'CHASE']) for (let steer = 1; steer <= 5; steer += 2) for (const zoom of [1, 7])
+    for (const cars of [2, 4, 6, 8]) for (const grid of ['BACK', 'RANDOM', 'POLE']) for (const limits of [0, 1]) for (const mode of ['RACE', 'TT']) for (const ghost of [0, 1]) {
+      const o = { track, laps, diff, cam, steer, brake: 6 - steer, zoom, cars, grid, limits, mode, ghost };
       assert.deepStrictEqual(plain(decodeSettings('#' + encodeSettings(o), TRACKS)), o);
     }
-  assert.strictEqual(encodeSettings(SETTINGS_DEFAULT), 'AUS-L3-N-F-S3-B3-Z7');
+  assert.strictEqual(encodeSettings(SETTINGS_DEFAULT), 'AUS-L3-N-F-S3-B3-Z7-C4-GB');
+  assert.strictEqual(encodeSettings(Object.assign({}, SETTINGS_DEFAULT, { limits: 1, mode: 'TT', ghost: 0 })), 'AUS-L3-N-F-S3-B3-Z7-C4-GB-TL-Q-GH0');
 });
 
 test('URL code: case-insensitive, invalid parts fall back to defaults', () => {
   assert.deepStrictEqual(plain(decodeSettings('#mon-l10-p-c-s1-b5-z2', TRACKS)),
-    { track: 'MON', laps: 10, diff: 'PRO', cam: 'CHASE', steer: 1, brake: 5, zoom: 2 });
+    Object.assign(plain(SETTINGS_DEFAULT), { track: 'MON', laps: 10, diff: 'PRO', cam: 'CHASE', steer: 1, brake: 5, zoom: 2 }));
+  // a v2.x code (no cars/grid parts) opens with the new defaults
+  assert.strictEqual(encodeSettings(decodeSettings('#ITA-L5-N-F-S3-B3-Z7', TRACKS)), 'ITA-L5-N-F-S3-B3-Z7-C4-GB');
   // codes saved by v2.1-2.2 (E = easy, H = hard) still work
   assert.strictEqual(decodeSettings('AUS-E', TRACKS).diff, 'ROOKIE');
   assert.strictEqual(decodeSettings('AUS-H', TRACKS).diff, 'PRO');
-  assert.strictEqual(encodeSettings(decodeSettings('AUS-R', TRACKS)), 'AUS-L3-R-F-S3-B3-Z7');
-  assert.deepStrictEqual(plain(decodeSettings('#XYZ-L4-S9-B0-Z8-Q', TRACKS)), plain(SETTINGS_DEFAULT));
+  assert.strictEqual(encodeSettings(decodeSettings('AUS-R', TRACKS)), 'AUS-L3-R-F-S3-B3-Z7-C4-GB');
+  assert.deepStrictEqual(plain(decodeSettings('#XYZ-L4-S9-B0-Z8-C3-GX-TX', TRACKS)), plain(SETTINGS_DEFAULT));
   assert.deepStrictEqual(plain(decodeSettings('', TRACKS)), plain(SETTINGS_DEFAULT));
 });
 

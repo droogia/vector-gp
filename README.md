@@ -3,6 +3,7 @@
 A single-file, no-dependency HTML racing game (green-on-black "acid" interface) in the
 style of 80s monochrome vector arcade games. Four Formula 1-style cars race top-down on
 real Grand Prix circuits: the full 2026 calendar plus circuits from past championships.
+Races of 2 to 8 cars, or a time trial alone against the clock and your ghost.
 
 Everything runs in the browser: open `vector-gp.html` (or `index.html`, which forwards to
 it) and play. Nothing is uploaded anywhere.
@@ -14,11 +15,13 @@ Online: https://droogia.github.io/vector-gp/
 1. Pick a circuit in the list (click or arrow keys). Enter or a double click opens the
    circuit box: a large map with a marker driving a lap, and the circuit's data (Grand Prix,
    location, 2026 round or F1 years, length, direction, race distance).
-2. In the box, set laps (1, 3, 5, 10), AI level (Rookie, Normal, Pro) and camera (Fixed,
-   Chase). Left/Right move to the previous/next circuit; Esc goes back to the list.
+2. In the box, set laps (1, 3, 5, 10), AI level (Rookie, Normal, Pro), camera (Fixed,
+   Chase), number of cars (2, 4, 6, 8), your grid position (Back, Random, Pole), track
+   limits (Off, On) and mode (Race, Time trial). Left/Right move to the previous/next circuit; Esc goes back to the list.
    About a second after a circuit is highlighted, its music starts (see below).
-3. **Start** or Enter starts the race. Wait for the five lights to go out. You start from
-   the back of the grid.
+3. **Start** or Enter starts the race. Wait for the five lights to go out. In time trial
+   there are no lights and no other cars: the clock starts when you press the throttle, laps
+   are unlimited, and Esc ends the run with a summary of every lap and sector.
 
 In the menu (circuit list and circuit box) these keys change the race options without
 moving the selection:
@@ -26,6 +29,10 @@ moving the selection:
 | Key | Action |
 |---|---|
 | 1 3 5 0 | Laps 1 / 3 / 5 / 10 |
+| 2 4 6 8 | Number of cars |
+| G | Grid position: Back / Random / Pole |
+| L | Track limits on/off |
+| Q | Race / Time trial |
 | R N P | AI level Rookie / Normal / Pro |
 | F / C | Camera Fixed / Chase |
 | O | Options |
@@ -49,10 +56,27 @@ In the race:
 | P | Pause |
 | V | Sound on/off |
 | R | Restart the race |
-| Esc | Pause, then back to the menu (the box of the circuit just raced) |
+| Esc | Pause, then back to the menu (the box of the circuit just raced); in time trial, end the run |
 
 All driving controls are on the arrow keys, so the game can be played with one hand.
 On a touch screen, on-screen buttons appear (steer, brake, throttle, back on track).
+
+### Race information
+
+- **Sectors**: each lap is split into three equal-length sectors, marked by dashed ticks on
+  the track and on the mini-map. The HUD shows the sector times of the current lap; ★ marks a
+  best sector of the session on that circuit.
+- **Delta**: once you have a best lap in the session, Δ shows live how far ahead (−) or
+  behind (+) of it you are at the same point of the lap.
+- **Ghost**: your best lap of the session on the circuit is replayed as a dashed car (can be
+  turned off in Options). Best laps and sectors are kept only until the page is closed.
+- **Slipstream**: close behind another car on a straight, lined up with it, you get less drag
+  and up to 4% more top speed ("SLIPSTREAM" on screen). The AI cars get it too.
+- **Track limits** (option, off by default): going off the track while moving for more than
+  0.3 s adds 1 second to that lap and to the race time, for every car. The results show the
+  penalties.
+- **Effects and sound**: dotted skid marks when sliding or braking hard, sparks on barrier
+  hits and contacts; an 8-gear engine sound whose pitch drops at each upshift.
 
 ### Options
 
@@ -61,6 +85,7 @@ On a touch screen, on-screen buttons appear (steer, brake, throttle, back on tra
 | Steering | 1–5, default 3 | How quickly the steering reaches full lock and how sharply the car can turn |
 | Brakes | 1–5, default 3 | Braking force, about ±15% per level |
 | Zoom | 1–7, default 7 | Each level down shows about 40% more track |
+| Ghost car | On / Off, default On | Show your best lap of the session as a dashed car |
 
 Steering and brakes apply to your car only; the AI cars are set by the AI level.
 
@@ -70,7 +95,7 @@ The game uses no browser storage. All settings live in the page address, in a re
 code that updates as you change them, for example:
 
 ```
-https://droogia.github.io/vector-gp/#MON-L5-N-C-S2-B4-Z6
+https://droogia.github.io/vector-gp/#MON-L5-N-C-S2-B4-Z6-C6-GP-TL
 ```
 
 | Part | Meaning |
@@ -82,10 +107,15 @@ https://droogia.github.io/vector-gp/#MON-L5-N-C-S2-B4-Z6
 | `S2` | Steering 1–5 |
 | `B4` | Brakes 1–5 |
 | `Z6` | Zoom 1–7 |
+| `C6` | Cars: 2, 4, 6 or 8 |
+| `GP` | Grid: `GB` back, `GR` random, `GP` pole |
+| `TL` | Track limits on (left out when off) |
+| `Q` | Time trial (left out for a race) |
+| `GH0` | Ghost car off (left out when on) |
 
 Bookmark the address to keep a setup, or share it. Parts can be in any order and are not
-case-sensitive; missing or invalid parts use the defaults (`AUS-L3-N-F-S3-B3-Z7`). Lap times
-are not stored: the HUD and the help box show this race's last, best and fastest laps.
+case-sensitive; missing or invalid parts use the defaults (`AUS-L3-N-F-S3-B3-Z7-C4-GB`). Lap times
+are not stored: best laps, sectors and the ghost last only until the page is closed.
 
 ## Music
 
@@ -191,7 +221,8 @@ The circuit list, names, dates and the per-circuit options are at the top of
   edge lines) there is much more drag. Barriers bounce the car and turn its nose along the
   wall, so it never gets pinned.
 - **AI**: steers toward a point ahead on its own line, follows the speed profile scaled by its
-  skill, and moves aside to pass a slower car in front.
+  skill, and moves aside to pass a slower car in front. In a field of several cars the skills
+  are spread over the AI level's range, fastest at the front of the grid.
 - **Collisions**: each car is two circles; contacts push the cars apart and exchange some
   speed.
 
@@ -199,7 +230,7 @@ The circuit list, names, dates and the per-circuit options are at the top of
 
 - The circuits are smoothed and widened, so some details (tight chicanes, kerb lines) are
   simplified.
-- No pit stops, tyre wear, damage or penalties.
+- No pit stops, tyre wear or damage; the only penalty is for track limits.
 - The AI does not defend its position.
 - The web font (Share Tech Mono) loads from Google Fonts; offline, a local monospace font is
   used instead.
@@ -214,7 +245,8 @@ npm test
 
 The tests load the game logic straight from `vector-gp.html` and check that every circuit
 has the right length and drivable geometry, that a single AI car laps each circuit without
-touching a barrier, that a full field of four finishes a race on every circuit, the
+touching a barrier, that a full field of eight finishes a race on every circuit, the
+grid and AI skill set-up, slipstream, track-limit penalties, sector times, ghost and delta, the
 settings code in the address (round trip, invalid input), the back-on-track rules, and that
 higher steering and brake levels turn faster and stop sooner.
 

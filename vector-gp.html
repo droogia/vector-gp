@@ -78,17 +78,21 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 <canvas id="game"></canvas>
 <div id="menu">
   <h1>VECTOR GP</h1>
-  <div class="sub">2026 CALENDAR + PAST CHAMPIONSHIPS · 40 CIRCUITS · 4 CARS · TOP-DOWN VECTOR RACING</div>
+  <div class="sub">2026 CALENDAR + PAST CHAMPIONSHIPS · 40 CIRCUITS · RACES OF 2 TO 8 CARS · TIME TRIAL · TOP-DOWN VECTOR RACING</div>
   <div class="bar">
     <div id="selname"></div>
     <div class="opt"><span>LAPS</span><button data-o="laps" data-v="1">1</button><button data-o="laps" data-v="3">3</button><button data-o="laps" data-v="5">5</button><button data-o="laps" data-v="10">10</button></div>
     <div class="opt"><span>AI</span><button data-o="diff" data-v="ROOKIE">ROOKIE</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="PRO">PRO</button></div>
     <div class="opt"><span>CAMERA</span><button data-o="cam" data-v="FIXED">FIXED</button><button data-o="cam" data-v="CHASE">CHASE</button></div>
+    <div class="opt"><span>CARS</span><button data-o="cars" data-v="2">2</button><button data-o="cars" data-v="4">4</button><button data-o="cars" data-v="6">6</button><button data-o="cars" data-v="8">8</button></div>
+    <div class="opt"><span>GRID</span><button data-o="grid" data-v="BACK">BACK</button><button data-o="grid" data-v="RANDOM">RANDOM</button><button data-o="grid" data-v="POLE">POLE</button></div>
+    <div class="opt"><span>LIMITS</span><button data-o="limits" data-v="0">OFF</button><button data-o="limits" data-v="1">ON</button></div>
+    <div class="opt"><span>MODE</span><button data-o="mode" data-v="RACE">RACE</button><button data-o="mode" data-v="TT">TIME TRIAL</button></div>
     <button id="setbtn">OPTIONS</button>
     <button id="go">START ▶</button>
   </div>
   <div id="grid"></div>
-  <div class="foot">ARROWS SELECT · ENTER OR DOUBLE-CLICK OPENS THE CIRCUIT · 1 3 5 0 LAPS · R N P AI · F C CAMERA · O OPTIONS · H HELP · T MUSIC · V SOUND · SETTINGS ARE KEPT IN THE PAGE ADDRESS (#CODE): BOOKMARK IT<br>
+  <div class="foot">ARROWS SELECT · ENTER OR DOUBLE-CLICK OPENS THE CIRCUIT · 1 3 5 0 LAPS · 2 4 6 8 CARS · G GRID · R N P AI · L LIMITS · Q TIME TRIAL · F C CAMERA · O OPTIONS · H HELP · T MUSIC · V SOUND · SETTINGS ARE KEPT IN THE PAGE ADDRESS (#CODE): BOOKMARK IT<br>
   Bahrain and Saudi Arabia were cancelled from the 2026 calendar but stay playable. Circuit outlines come from surveyed geometry (bacinger/f1-circuits, MIT licence), smoothed and widened for the game, with real lengths, start lines and racing directions.</div>
 </div>
 <div id="panel"></div>
@@ -98,6 +102,10 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
     <div class="opt"><span>LAPS</span><button data-o="laps" data-v="1">1</button><button data-o="laps" data-v="3">3</button><button data-o="laps" data-v="5">5</button><button data-o="laps" data-v="10">10</button></div>
     <div class="opt"><span>AI</span><button data-o="diff" data-v="ROOKIE">ROOKIE</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="PRO">PRO</button></div>
     <div class="opt"><span>CAMERA</span><button data-o="cam" data-v="FIXED">FIXED</button><button data-o="cam" data-v="CHASE">CHASE</button></div>
+    <div class="opt"><span>CARS</span><button data-o="cars" data-v="2">2</button><button data-o="cars" data-v="4">4</button><button data-o="cars" data-v="6">6</button><button data-o="cars" data-v="8">8</button></div>
+    <div class="opt"><span>GRID</span><button data-o="grid" data-v="BACK">BACK</button><button data-o="grid" data-v="RANDOM">RANDOM</button><button data-o="grid" data-v="POLE">POLE</button></div>
+    <div class="opt"><span>LIMITS</span><button data-o="limits" data-v="0">OFF</button><button data-o="limits" data-v="1">ON</button></div>
+    <div class="opt"><span>MODE</span><button data-o="mode" data-v="RACE">RACE</button><button data-o="mode" data-v="TT">TIME TRIAL</button></div>
   </div>
   <div class="nav"><button id="dprev">◀ PREV</button><button id="dback">BACK [ESC]</button><span class="sp" id="dpos"></span><button id="dgo">START ▶ [ENTER]</button><button id="dnext">NEXT ▶</button></div>
 </div></div>
@@ -108,7 +116,7 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 <div class="vig"></div><div class="scan"></div>
 <script>
 'use strict';
-/* VECTOR GP v2.5 — single-file browser racing game */
+/* VECTOR GP v3.0 — single-file browser racing game */
 /* Circuit geometry derived from bacinger/f1-circuits (https://github.com/bacinger/f1-circuits)
    Copyright (c) 2019-2025 Tomislav Bacinger, MIT License. Smoothed and widened for gameplay. */
 const TRACKS=[
@@ -166,7 +174,10 @@ const STEER_RATE = [0.75, 0.88, 1, 1.12, 1.25];   // how hard the car can turn
 const STEER_RAMP = [3.5, 5, 7, 9.5, 12];           // how fast the steering reaches full lock (per s)
 const BRAKE_LV = [0.70, 0.85, 1, 1.15, 1.30];      // braking force
 const RECOVER_WAIT = 3;
-const REVERSE_DELAY = 1;                           // seconds stopped (brake held) before reversing                            // seconds frozen after Space puts the car back
+const REVERSE_DELAY = 1;
+const DRAFT_GAIN = 0.04;                           // slipstream: up to +4% top speed, less drag
+const LIMIT_PENALTY = 1;                           // seconds added per track-limits offence
+const LIMIT_TIME = 0.3;                            // seconds off track (moving) that make an offence                           // seconds stopped (brake held) before reversing                            // seconds frozen after Space puts the car back
 
 function angDiff(a, b) { let d = a - b; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; }
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -243,7 +254,8 @@ function makeCar(T, slot, isP, skill, num) {
     num, isP, skill, slot,
     x: T.X[i] + T.NX[i] * side, y: T.Y[i] + T.NY[i] * side, a: Math.atan2(T.TY[i], T.TX[i]),
     vx: 0, vy: 0, f: 0, idx: i, lap: 0, prog: i, d: side, off: false, steer: 0,
-    line: [-8, 6, -4, 0][slot], fin: false, finT: 0, lapStart: 0, last: 0, best: Infinity, auto: !isP
+    line: [-8, 6, -4, 0, 8, -6, 4, -2][slot % 8], fin: false, finT: 0, lapStart: 0, last: 0, best: Infinity, auto: !isP,
+    draft: 0, pen: 0, lapPen: 0, secPen: 0, sec: 0, secStartT: 0, cur: [], lastSec: null, laps: []
   };
 }
 
@@ -265,14 +277,16 @@ function stepCar(c, T, ctl, dt) {
   const ca = Math.cos(c.a), sa = Math.sin(c.a);
   let f = c.vx * ca + c.vy * sa, l = -c.vx * sa + c.vy * ca;
   const off = c.off;
-  if (ctl.thr > 0) f += ACC * ctl.thr * Math.max(0, 1 - (f / VMAX) ** 2) * dt;
+  const vmax = VMAX * (1 + DRAFT_GAIN * c.draft);
+  if (ctl.thr > 0) f += ACC * ctl.thr * Math.max(0, 1 - (f / vmax) ** 2) * dt;
   const sl = (c.steerLv || 3) - 1, bl = (c.brakeLv || 3) - 1;
   if (ctl.brk > 0 && !ctl.thr) {
     if (f > 2) { f -= BRK * BRAKE_LV[bl] * ctl.brk * dt; c.stopT = 0; }
     else if (f > -2 && (c.stopT || 0) < REVERSE_DELAY) { f = 0; c.stopT = (c.stopT || 0) + dt; }   // stopped: wait before reversing
     else f = Math.max(-90, f - 160 * ctl.brk * dt);
   } else { c.stopT = 0; if (ctl.brk > 0) f -= BRK * BRAKE_LV[bl] * ctl.brk * dt * (f > 2 ? 1 : 0); }
-  f -= f * (off ? 1.8 : 0.04) * dt;
+  f -= f * (off ? 1.8 : 0.04 * (1 - 0.5 * c.draft)) * dt;
+  c.braking = ctl.brk > 0 && f > 60;
   if (!ctl.thr && !ctl.brk) f -= f * 0.3 * dt;
   l *= Math.exp(-(off ? 3 : 9) * dt);
   c.vx = f * ca - l * sa; c.vy = f * sa + l * ca;
@@ -288,7 +302,7 @@ function stepCar(c, T, ctl, dt) {
     c.x -= nx * push; c.y -= ny * push;
     const vn = c.vx * nx + c.vy * ny;
     if (vn > 0) { c.vx -= 1.3 * vn * nx; c.vy -= 1.3 * vn * ny; }
-    c.vx *= 0.9; c.vy *= 0.9; c.hit = 0.3;
+    c.vx *= 0.9; c.vy *= 0.9; c.hit = 0.3; c.spark = { x: c.x + nx * 6, y: c.y + ny * 6 };
     // glance off: swing the nose toward the barrier's direction
     let ta = Math.atan2(T.TY[j], T.TX[j]); if (Math.abs(angDiff(ta, c.a)) > Math.PI / 2) ta += Math.PI;
     c.a += angDiff(ta, c.a) * 0.12;
@@ -329,24 +343,91 @@ function collide(cars, N) {
         const nx = dx / d, ny = dy / d, p = (m - d) / 2;
         A.x -= nx * p; A.y -= ny * p; B.x += nx * p; B.y += ny * p;
         const rv = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
-        if (rv < 0) { const jj = -(1.3) * rv / 2; A.vx -= jj * nx; A.vy -= jj * ny; B.vx += jj * nx; B.vy += jj * ny; A.hit = B.hit = 0.2; }
+        if (rv < 0) { const jj = -(1.3) * rv / 2; A.vx -= jj * nx; A.vy -= jj * ny; B.vx += jj * nx; B.vy += jj * ny; A.hit = B.hit = 0.2; if (-rv > 25) A.spark = { x: (ax + bx) / 2, y: (ay + by) / 2 }; }
       }
     }
   }
 }
 
-// one simulation tick for the whole field; returns events
+// slipstream: a car close behind another, lined up with it, gets a tow (0..1, smoothed)
+function updateDraft(cars, dt) {
+  for (const c of cars) {
+    let target = 0;
+    if (!c.off && c.f > 60 && !(c.wait > 0)) {
+      const ca = Math.cos(c.a), sa = Math.sin(c.a);
+      for (const o of cars) {
+        if (o === c || o.wait > 0 || o.f < 60) continue;
+        const dx = o.x - c.x, dy = o.y - c.y, fw = dx * ca + dy * sa, lt = -dx * sa + dy * ca;
+        if (fw > 25 && fw < 160 && Math.abs(lt) < 14) target = Math.max(target, 1 - (fw - 25) / 135);
+      }
+    }
+    c.draft += (target - c.draft) * Math.min(1, dt * 3);
+  }
+}
+
+// lap bookkeeping for one car after it moved: sectors, track limits, lap times, recording
+function lapTime(c, race) { return race.t - c.lapStart + c.lapPen; }
+function afterStep(c, race, prevLap, dt) {
+  const T = race.T, N = T.N;
+  if (race.limits && !c.fin) {                       // track limits: +1 s per offence
+    if (c.off && Math.abs(c.f) > 20) {
+      c.offT = (c.offT || 0) + dt;
+      if (c.offT > LIMIT_TIME && !c.offFlag) { c.offFlag = true; c.pen += LIMIT_PENALTY; c.lapPen += LIMIT_PENALTY; c.secPen += LIMIT_PENALTY; c.limitEvent = true; }
+    } else if (!c.off) { c.offT = 0; c.offFlag = false; }
+  }
+  if (c.lap >= 1 && !c.fin) {                         // sectors: three equal thirds of the lap
+    const s = Math.min(2, Math.floor(c.idx * 3 / N));
+    if (s === c.sec + 1) { c.cur[c.sec] = race.t - c.secStartT + c.secPen; c.secStartT = race.t; c.secPen = 0; c.sec = s; }
+  }
+  if (c.rec && !c.fin) {                              // player: record the lap for delta and ghost
+    if (!c.recTrace) { c.recTrace = new Float64Array(N).fill(-1); c.recPath = []; c.recNext = 0; }
+    const tl = race.t - c.lapStart;
+    if (c.lap >= 1 && c.recTrace[c.idx] < 0) c.recTrace[c.idx] = tl + c.lapPen;
+    if (tl >= c.recNext) { c.recPath.push(tl, c.x, c.y, c.a); c.recNext = tl + 0.05; }
+  }
+  if (c.lap > prevLap) {
+    if (c.lap >= 2 && !c.fin) {
+      c.last = lapTime(c, race); c.best = Math.min(c.best, c.last);
+      c.cur[2] = race.t - c.secStartT + c.secPen; c.lastSec = c.cur.slice(0, 3);
+      c.laps.push({ n: c.lap - 1, time: c.last, sec: c.lastSec, pen: c.lapPen });
+      if (c.rec) {
+        const lap = { time: c.last, trace: c.recTrace, path: c.recPath, sec: c.lastSec };
+        if (!c.ref || lap.time < c.ref.time) { c.ref = lap; c.newRef = true; }
+        c.recTrace = null;
+      }
+      c.lapStart = race.t; c.lapPen = 0; c.secPen = 0; c.secStartT = race.t; c.sec = 0; c.cur = [];
+      c.newLap = 1.5; c.lapEvent = true;
+    } else if (c.lap === 1) { c.sec = 0; c.cur = []; }
+    if (c.lap > race.laps && !c.fin) { c.fin = true; c.finT = race.t; if (c.isP) { c.auto = true; c.skill = 0.6; } }
+  }
+}
+// live gap to the reference lap at the same point of the lap (negative = faster)
+function liveDelta(c, race) {
+  if (!c.ref || c.lap < 1 || c.fin) return null;
+  const r = c.ref.trace[c.idx]; if (r < 0) return null;
+  return lapTime(c, race) - r;
+}
+// where the reference (ghost) lap was at time tl into the lap
+function ghostAt(ref, tl) {
+  const p = ref.path, n = p.length / 4; if (!n) return null;
+  let i = Math.min(n - 1, Math.max(0, Math.floor(tl / 0.05)));
+  while (i > 0 && p[i * 4] > tl) i--;
+  while (i < n - 1 && p[(i + 1) * 4] <= tl) i++;
+  if (i >= n - 1) return { x: p[(n - 1) * 4 + 1], y: p[(n - 1) * 4 + 2], a: p[(n - 1) * 4 + 3] };
+  const t0 = p[i * 4], t1 = p[(i + 1) * 4], u = t1 > t0 ? clamp((tl - t0) / (t1 - t0), 0, 1) : 0;
+  return { x: p[i * 4 + 1] + (p[i * 4 + 5] - p[i * 4 + 1]) * u, y: p[i * 4 + 2] + (p[i * 4 + 6] - p[i * 4 + 2]) * u, a: p[i * 4 + 3] + angDiff(p[i * 4 + 7], p[i * 4 + 3]) * u };
+}
+
+// one simulation tick for the whole field
 function simTick(race, input, dt) {
   const { T, cars } = race;
+  updateDraft(cars, dt);
   for (const c of cars) {
     const prevLap = c.lap;
     if (c.wait > 0) { c.wait = Math.max(0, c.wait - dt); continue; }
     const ctl = c.auto ? aiControl(c, T, cars) : input;
     stepCar(c, T, ctl, dt);
-    if (c.lap > prevLap) {
-      if (c.lap >= 2 && !c.fin) { c.last = race.t - c.lapStart; c.best = Math.min(c.best, c.last); c.lapStart = race.t; c.newLap = 1.5; c.lapEvent = true; }
-      if (c.lap > race.laps && !c.fin) { c.fin = true; c.finT = race.t; if (c.isP) { c.auto = true; c.skill = 0.6; } }
-    }
+    afterStep(c, race, prevLap, dt);
     if (c.hit) c.hit = Math.max(0, c.hit - dt);
     if (c.newLap) c.newLap = Math.max(0, c.newLap - dt);
   }
@@ -369,10 +450,15 @@ function recover(c, T) {
   return true;
 }
 
-// settings <-> readable URL code, e.g. AUS-L3-N-F-S3-B3-Z7
-const SETTINGS_DEFAULT = { track: 'AUS', laps: 3, diff: 'NORMAL', cam: 'FIXED', steer: 3, brake: 3, zoom: 7 };
+// settings <-> readable URL code, e.g. AUS-L3-N-F-S3-B3-Z7-C4-GB (+ TL, Q, GH0 when set)
+const SETTINGS_DEFAULT = { track: 'AUS', laps: 3, diff: 'NORMAL', cam: 'FIXED', steer: 3, brake: 3, zoom: 7,
+  cars: 4, grid: 'BACK', limits: 0, mode: 'RACE', ghost: 1 };
 function encodeSettings(o) {
-  return [o.track, 'L' + o.laps, o.diff[0], o.cam[0], 'S' + o.steer, 'B' + o.brake, 'Z' + o.zoom].join('-');
+  const p = [o.track, 'L' + o.laps, o.diff[0], o.cam[0], 'S' + o.steer, 'B' + o.brake, 'Z' + o.zoom, 'C' + o.cars, 'G' + o.grid[0]];
+  if (o.limits) p.push('TL');
+  if (o.mode === 'TT') p.push('Q');
+  if (!o.ghost) p.push('GH0');
+  return p.join('-');
 }
 function decodeSettings(code, tracks) {
   const o = Object.assign({}, SETTINGS_DEFAULT);
@@ -386,12 +472,31 @@ function decodeSettings(code, tracks) {
     else if ((m = /^S([1-5])$/.exec(p))) o.steer = +m[1];
     else if ((m = /^B([1-5])$/.exec(p))) o.brake = +m[1];
     else if ((m = /^Z([1-7])$/.exec(p))) o.zoom = +m[1];
+    else if ((m = /^C([2468])$/.exec(p))) o.cars = +m[1];
+    else if ((m = /^G([BRP])$/.exec(p))) o.grid = { B: 'BACK', R: 'RANDOM', P: 'POLE' }[m[1]];
+    else if (p === 'TL') o.limits = 1;
+    else if (p === 'Q') o.mode = 'TT';
+    else if (p === 'GH0') o.ghost = 0;
   }
   return o;
 }
 
+// a race field: AI skills spread over the AI level's range, fastest at the front of the grid
+function makeField(T, n, diff, grid, rnd) {
+  const [lo, mid, hi] = DIFF[diff], nAI = n - 1;
+  const skills = nAI === 1 ? [mid] : Array.from({ length: nAI }, (_, k) => hi - (hi - lo) * k / (nAI - 1));
+  const pSlot = grid === 'POLE' ? 0 : grid === 'RANDOM' ? Math.floor((rnd || Math.random)() * n) : n - 1;
+  const cars = []; let k = 0;
+  for (let s = 0; s < n; s++) {
+    if (s === pSlot) { const p = makeCar(T, s, true, 1, 1); p.rec = true; cars.push(p); }
+    else cars.push(makeCar(T, s, false, skills[k++], k + 1));
+  }
+  return cars;
+}
+
+function raceTime(c) { return c.finT + c.pen; }   // finishing time including penalties
 function standings(cars) {
-  return cars.slice().sort((a, b) => (a.fin && b.fin) ? a.finT - b.finT : a.fin ? -1 : b.fin ? 1 : b.prog - a.prog);
+  return cars.slice().sort((a, b) => (a.fin && b.fin) ? raceTime(a) - raceTime(b) : a.fin ? -1 : b.fin ? 1 : b.prog - a.prog);
 }
 
 // ===== CIRCUIT MUSIC: opening phrases in chiptune style =====
@@ -495,6 +600,8 @@ opt.sel = Math.max(0, TRACKS.findIndex(t => t.id === opt.track));
 let race = null, mode = 'menu', paused = false, overlay = null, fullView = false, muted = false, musicOff = false;   // V: all sound, T: circuit music
 let camX = 0, camY = 0, lightsT = 0, goAt = 0, lastTs = 0, acc = 0, msg = '', msgT = 0, zoomCur = 7;
 let detailOpen = false, settingsRow = 0;
+const sessionRef = {}, sessionSec = {};   // per circuit, this session only: best lap (ghost, delta) and best sectors
+let skids = [], sparks = [];               // visual effects (world coordinates)
 const keys = {};
 const touch = { l: 0, r: 0, g: 0, b: 0 };
 
@@ -520,15 +627,17 @@ function fmt(t) {
 }
 
 // ---------- audio ----------
-let AC = null, eng = null, engG = null;
+let AC = null, eng = null, eng2 = null, engLp = null, engG = null, gear = 1;
 function audioInit() {
   if (AC) return;
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     eng = AC.createOscillator(); eng.type = 'sawtooth';
-    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    eng2 = AC.createOscillator(); eng2.type = 'square';
+    const g2 = AC.createGain(); g2.gain.value = 0.35;
+    engLp = AC.createBiquadFilter(); engLp.type = 'lowpass'; engLp.frequency.value = 900;
     engG = AC.createGain(); engG.gain.value = 0;
-    eng.connect(lp); lp.connect(engG); engG.connect(AC.destination); eng.start();
+    eng.connect(engLp); eng2.connect(g2); g2.connect(engLp); engLp.connect(engG); engG.connect(AC.destination); eng.start(); eng2.start();
   } catch (e) { AC = null; }
 }
 function beep(f, d) {
@@ -624,7 +733,11 @@ function trackPaths(T) {
     const p = (u, v) => [cx + T.NX[i] * u + T.TX[i] * v, cy + T.NY[i] * u + T.TY[i] * v];
     GR.moveTo(...p(-9, 10)); GR.lineTo(...p(-9, 16)); GR.lineTo(...p(9, 16)); GR.lineTo(...p(9, 10));
   }
-  T.paths = { L, R, Wl, Kb, SF, SFf, GR, C };
+  const Sec = new Path2D();                     // sector boundaries: thin ticks across the track
+  for (const i of [Math.floor(T.N / 3), Math.floor(2 * T.N / 3)]) {
+    for (let u = -HALF; u < HALF; u += 14) { Sec.moveTo(T.X[i] + T.NX[i] * u, T.Y[i] + T.NY[i] * u); Sec.lineTo(T.X[i] + T.NX[i] * (u + 7), T.Y[i] + T.NY[i] * (u + 7)); }
+  }
+  T.paths = { L, R, Wl, Kb, SF, SFf, GR, C, Sec };
   return T.paths;
 }
 
@@ -739,7 +852,7 @@ function selectTrack(i) {
   if (detailOpen) openDetail();
 }
 document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => {
-  opt[b.dataset.o] = b.dataset.o === 'laps' ? +b.dataset.v : b.dataset.v; writeHash(); refreshMenu(); if (detailOpen) detailInfo();
+  opt[b.dataset.o] = ['laps', 'cars', 'limits'].includes(b.dataset.o) ? +b.dataset.v : b.dataset.v; writeHash(); refreshMenu(); if (detailOpen) detailInfo();
 });
 document.getElementById('go').onclick = () => startRace();
 document.getElementById('setbtn').onclick = () => openSettings();
@@ -752,6 +865,10 @@ function direction(t) {
   for (let i = 0; i < T.N; i++) { const j = (i + 1) % T.N; a += T.X[i] * T.Y[j] - T.X[j] * T.Y[i]; }
   return a > 0 ? 'CLOCKWISE' : 'ANTICLOCKWISE';
 }
+function raceDesc(t) {
+  if (opt.mode === 'TT') return `TIME TRIAL · UNLIMITED LAPS${opt.limits ? ' · TRACK LIMITS' : ''}`;
+  return `${opt.laps} LAP${opt.laps > 1 ? 'S' : ''} · ${(opt.laps * t.km).toFixed(1)} KM · ${opt.cars} CARS · GRID ${opt.grid}${opt.limits ? ' · TRACK LIMITS' : ''}`;
+}
 function detailInfo() {
   const t = TRACKS[opt.sel];
   const row = (k, v) => `<tr><td>${k}</td><td>${v}</td></tr>`;
@@ -759,7 +876,8 @@ function detailInfo() {
     row('CIRCUIT', t.c) + row('LOCATION', t.city) +
     (t.g === '2026' ? row('2026', `ROUND ${String(t.r).padStart(2, '0')} · ${t.date.toUpperCase()}${t.canc ? ' · <b>CANCELLED</b>' : ''}`) : row('F1 YEARS', t.date)) +
     row('LENGTH', t.km.toFixed(3) + ' KM') + row('DIRECTION', direction(t)) +
-    row('RACE', `${opt.laps} LAP${opt.laps > 1 ? 'S' : ''} · ${(opt.laps * t.km).toFixed(1)} KM`) +
+    row('RACE', raceDesc(t)) +
+    (sessionRef[t.id] ? row('SESSION BEST', fmt(sessionRef[t.id].time)) : '') +
     row(trackMusic(t).kind === 'ANTHEM' ? 'ANTHEM' : 'MUSIC', `${trackMusic(t).title}${muted ? ' · <b>OFF</b> (V)' : musicOff ? ' · <b>OFF</b> (T)' : ''}`) + '</table>';
   document.getElementById('dpos').textContent = `${opt.sel + 1} / ${TRACKS.length}`;
 }
@@ -806,12 +924,14 @@ function startRace() {
   musicStop(); clearTimeout(music.wait);
   writeHash();
   const t = TRACKS[opt.sel], T = buildTrack(t); trackPaths(T);
-  const sk = DIFF[opt.diff];
-  const cars = [];
-  for (let s = 0; s < 4; s++) cars.push(makeCar(T, s, s === 3, s === 3 ? 1 : sk[2 - s], s === 3 ? 1 : s + 2));
-  race = { t: 0, T, cars, laps: opt.laps, track: t, player: cars[3], doneShown: false };
-  camX = race.player.x; camY = race.player.y;
-  mode = 'lights'; lightsT = 0; goAt = 4 + 0.3 + Math.random() * 0.9;
+  const tt = opt.mode === 'TT';
+  const cars = tt ? makeField(T, 1, opt.diff, 'POLE') : makeField(T, opt.cars, opt.diff, opt.grid);
+  const P = cars.find(c => c.isP);
+  P.ref = sessionRef[t.id] || null;
+  race = { t: 0, T, cars, laps: tt ? Infinity : opt.laps, tt, limits: !!opt.limits, started: !tt, track: t, player: P, doneShown: false };
+  camX = P.x; camY = P.y; skids = []; sparks = []; gear = 1;
+  if (tt) mode = 'race';                                // time trial: no lights, the clock starts with the throttle
+  else { mode = 'lights'; lightsT = 0; goAt = 4 + 0.3 + Math.random() * 0.9; }
   closeOverlay(); closeDetail(); zoomCur = opt.zoom;
   menuEl.style.display = 'none';
 }
@@ -832,11 +952,13 @@ function closeOverlay() { overlay = null; paused = false; panel.style.display = 
 const SET_ROWS = [
   { k: 'steer', label: 'STEERING', n: 5, note: 'how quickly and how sharply your car turns' },
   { k: 'brake', label: 'BRAKES', n: 5, note: 'braking force of your car' },
-  { k: 'zoom', label: 'ZOOM', n: 7, note: '7 = closest view (also + / - while racing)' }];
+  { k: 'zoom', label: 'ZOOM', n: 7, note: '7 = closest view (also + / - while racing)' },
+  { k: 'ghost', label: 'GHOST CAR', n: 1, toggle: true, note: 'your best lap of the session on this circuit, as a dashed outline' }];
 function settingsHTML() {
   const rows = SET_ROWS.map((r, i) => {
     let bar = ''; for (let k = 1; k <= r.n; k++) bar += `<span class="pip${k <= opt[r.k] ? ' on' : ''}"></span>`;
-    return `<tr class="${i === settingsRow ? 'cur' : ''}"><td><span class="mk">▶</span>${r.label}</td><td><button data-act="dec" data-k="${r.k}">-</button></td><td class="pips">${bar}</td><td><button data-act="inc" data-k="${r.k}">+</button></td><td>${opt[r.k]}</td></tr><tr class="note"><td></td><td colspan="4">${r.note}</td></tr>`;
+    const val = r.toggle ? (opt[r.k] ? 'ON' : 'OFF') : opt[r.k];
+    return `<tr class="${i === settingsRow ? 'cur' : ''}"><td><span class="mk">▶</span>${r.label}</td><td><button data-act="dec" data-k="${r.k}">-</button></td><td class="pips">${bar}</td><td><button data-act="inc" data-k="${r.k}">+</button></td><td>${val}</td></tr><tr class="note"><td></td><td colspan="4">${r.note}</td></tr>`;
   }).join('');
   return `<h2>OPTIONS</h2><div class="sub">STEERING AND BRAKES AFFECT ONLY YOUR CAR · AI CARS FOLLOW THE AI LEVEL</div><table class="set"><colgroup><col style="width:11em"><col style="width:3.5em"><col><col style="width:3.5em"><col style="width:2.5em"></colgroup>${rows}</table>
   <div class="sub">URL CODE #${encodeSettings(opt)}</div><div class="keys">[↑↓] SELECT &nbsp; [←→] CHANGE &nbsp; [O] [ESC] CLOSE</div>`;
@@ -844,7 +966,7 @@ function settingsHTML() {
 function openSettings() { settingsRow = Math.min(settingsRow, SET_ROWS.length - 1); openOverlay('settings', settingsHTML()); }
 function changeSetting(k, d) {
   const r = SET_ROWS.find(r => r.k === k);
-  opt[k] = clamp(opt[k] + d, 1, r.n); writeHash();
+  opt[k] = clamp(opt[k] + d, r.toggle ? 0 : 1, r.n); writeHash();
   if (overlay === 'settings') panel.innerHTML = settingsHTML();
 }
 panel.addEventListener('click', e => {
@@ -856,13 +978,14 @@ panel.addEventListener('click', e => {
 // ---------- help box (in-race) ----------
 const KEYS_RACE = [['↑ / W', 'THROTTLE'], ['↓ / S', 'BRAKE · HOLD 1 S WHEN STOPPED TO REVERSE'], ['← → / A D', 'STEER'], ['SPACE', 'BACK ON TRACK (3 S WAIT)'],
   ['+ / -', 'ZOOM IN / OUT'], ['M', 'WHOLE CIRCUIT'], ['F / C', 'CAMERA FIXED / CHASE'], ['H', 'THIS HELP'], ['O', 'OPTIONS'],
-  ['P', 'PAUSE'], ['V', 'SOUND ON / OFF'], ['R', 'RESTART'], ['ESC', 'PAUSE / MENU']];
+  ['P', 'PAUSE'], ['V', 'SOUND ON / OFF'], ['R', 'RESTART'], ['ESC', 'PAUSE / MENU · TIME TRIAL: END RUN']];
 const KEYS_MENU = [['← → ↑ ↓', 'SELECT CIRCUIT'], ['ENTER', 'OPEN CIRCUIT BOX / START RACE'], ['ESC', 'BACK TO THE LIST'],
-  ['1 3 5 0', 'LAPS 1 / 3 / 5 / 10'], ['R N P', 'AI ROOKIE / NORMAL / PRO'], ['F / C', 'CAMERA FIXED / CHASE'],
+  ['1 3 5 0', 'LAPS 1 / 3 / 5 / 10'], ['2 4 6 8', 'CARS IN THE RACE'], ['G', 'GRID: BACK / RANDOM / POLE'], ['R N P', 'AI ROOKIE / NORMAL / PRO'],
+  ['L', 'TRACK LIMITS ON / OFF (+1 S PER OFFENCE)'], ['Q', 'RACE / TIME TRIAL'], ['F / C', 'CAMERA FIXED / CHASE'],
   ['O', 'OPTIONS'], ['H', 'THIS HELP'], ['T', 'CIRCUIT MUSIC ON / OFF'], ['V', 'ALL SOUND ON / OFF']];
 function gapText(c, lead, i) {
   if (i === 0) return 'LEADER';
-  if (c.fin && lead.fin) return '+' + (c.finT - lead.finT).toFixed(3);
+  if (c.fin && lead.fin) return '+' + (raceTime(c) - raceTime(lead)).toFixed(3);
   const lapsDown = Math.floor((lead.prog - c.prog) / race.T.N);
   if (lapsDown >= 1) return `+${lapsDown} LAP${lapsDown > 1 ? 'S' : ''}`;
   // time gap: distance behind the leader at the leader's average speed
@@ -878,7 +1001,7 @@ function helpHTML() {
   <div class="cols"><div><h3>KEYS</h3><table>${keysT}</table></div>
   <div><h3>STATUS</h3><table>${['LAP', 'POSITION', 'RACE TIME', 'YOUR LAST', 'YOUR BEST', 'FASTEST LAP'].map(row).join('')}
    <tr><td>OPTIONS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
-   <tr><td>RACE</td><td>${opt.laps} LAP${opt.laps > 1 ? 'S' : ''} · ${opt.diff} · ${opt.cam}</td></tr></table>
+   <tr><td>RACE</td><td>${opt.mode === 'TT' ? 'TIME TRIAL' : opt.laps + ' LAP' + (opt.laps > 1 ? 'S' : '') + ' · ' + opt.cars + ' CARS · GRID ' + opt.grid + ' · ' + opt.diff} · ${opt.cam}${opt.limits ? ' · TRACK LIMITS' : ''}</td></tr></table>
   <h3>LEADERBOARD</h3><table><tr><th>POS</th><th>DRIVER</th><th>GAP</th><th>LAST</th><th>BEST</th></tr></table></div></div>
   <div class="keys">[H] [ESC] CLOSE</div>`;
   }
@@ -887,18 +1010,19 @@ function helpHTML() {
   const fastCar = race.cars.find(c => c.best === fastest);
   const keysT = KEYS_RACE.map(([k, v]) => `<tr><td class="k">${k}</td><td>${v}</td></tr>`).join('');
   const lb = st.map((c, i) => `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${c.isP ? 'YOU' : 'CAR ' + c.num}</td><td>${gapText(c, st[0], i)}</td><td>${fmt(c.last)}</td><td>${fmt(c.best)}</td></tr>`).join('');
-  const t = race.track, lapShown = clamp(Math.max(1, P.lap), 1, race.laps);
+  const t = race.track, lapShown = race.tt ? Math.max(1, P.lap) : clamp(Math.max(1, P.lap), 1, race.laps);
   return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()}</div>
   <div class="cols"><div><h3>KEYS</h3><table>${keysT}</table></div>
   <div><h3>STATUS</h3><table>
-   <tr><td>LAP</td><td>${lapShown} / ${race.laps}</td></tr>
-   <tr><td>POSITION</td><td>${st.indexOf(P) + 1} / 4</td></tr>
+   <tr><td>LAP</td><td>${race.tt ? Math.max(1, P.lap) + ' · TIME TRIAL' : lapShown + ' / ' + race.laps}</td></tr>
+   <tr><td>POSITION</td><td>${race.tt ? '—' : (st.indexOf(P) + 1) + ' / ' + race.cars.length}</td></tr>
+   <tr><td>PENALTIES</td><td>${race.limits ? (P.pen ? '+' + P.pen + ' S' : 'NONE') : 'TRACK LIMITS OFF'}</td></tr>
    <tr><td>RACE TIME</td><td>${fmt(P.fin ? P.finT : race.t)}</td></tr>
    <tr><td>YOUR LAST</td><td>${fmt(P.last)}</td></tr>
    <tr><td>YOUR BEST</td><td>${fmt(P.best)}</td></tr>
    <tr><td>FASTEST LAP</td><td>${isFinite(fastest) ? fmt(fastest) + ' · ' + (fastCar.isP ? 'YOU' : 'CAR ' + fastCar.num) : '-:--.---'}</td></tr>
    <tr><td>OPTIONS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
-   <tr><td>RACE</td><td>${opt.diff} · ${opt.cam}</td></tr></table>
+   <tr><td>RACE</td><td>${race.tt ? 'TIME TRIAL' : opt.diff + ' · ' + race.cars.length + ' CARS'} · ${opt.cam}</td></tr></table>
   <h3>LEADERBOARD</h3><table><tr><th>POS</th><th>DRIVER</th><th>GAP</th><th>LAST</th><th>BEST</th></tr>${lb}</table></div></div>
   <div class="keys">[H] [ESC] CLOSE</div>`;
 }
@@ -911,17 +1035,28 @@ function resultsHTML() {
   const lead = st[0];
   let rows = st.map((c, i) => {
     let tm;
-    if (c.fin) tm = i === 0 ? fmt(c.finT) : '+' + (c.finT - lead.finT).toFixed(3);
+    if (c.fin) tm = i === 0 ? fmt(raceTime(c)) : '+' + (raceTime(c) - raceTime(lead)).toFixed(3);
     else { const lapsDown = Math.floor((lead.prog - c.prog) / race.T.N); tm = lapsDown >= 1 ? `+${lapsDown} LAP${lapsDown > 1 ? 'S' : ''}` : 'RUNNING'; }
-    return `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${c.isP ? 'YOU' : 'CAR ' + c.num}</td><td>${tm}</td><td>${fmt(c.best)}</td></tr>`;
+    return `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${c.isP ? 'YOU' : 'CAR ' + c.num}</td><td>${tm}</td><td>${c.pen ? '+' + c.pen + ' S' : ''}</td><td>${fmt(c.best)}</td></tr>`;
   }).join('');
   const pos = st.indexOf(P) + 1;
   return `<h2>${pos === 1 ? 'VICTORY' : 'FINISHED P' + pos}</h2><div class="sub">${race.track.gp.toUpperCase()} · ${race.laps} LAP${race.laps > 1 ? 'S' : ''} · ${opt.diff}</div>
-  <table><tr><th>POS</th><th>DRIVER</th><th>TIME</th><th>BEST LAP</th></tr>${rows}</table>
+  <table><tr><th>POS</th><th>DRIVER</th><th>TIME</th><th>PEN</th><th>BEST LAP</th></tr>${rows}</table>
   <div class="keys">[R] RESTART &nbsp; [ESC] MENU</div>`;
 }
 
 // ---------- input ----------
+// time trial: summary of the run
+function ttSummaryHTML() {
+  const P = race.player, laps = P.laps, t = race.track;
+  const best = Math.min(...laps.map(l => l.time)), bs = sessionSec[t.id] || [];
+  const rows = laps.map(l => `<tr class="${l.time === best ? 'me' : ''}"><td>${l.n}</td><td>${fmt(l.time)}</td>${l.sec.map((s, k) => `<td>${s.toFixed(3)}${s === bs[k] ? ' ★' : ''}</td>`).join('')}<td>${l.pen ? '+' + l.pen + ' S' : ''}</td></tr>`).join('');
+  const ideal = bs.length === 3 ? fmt(bs[0] + bs[1] + bs[2]) : '-:--.---';
+  return `<h2>TIME TRIAL</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()} · ${laps.length} LAP${laps.length === 1 ? '' : 'S'}${race.limits ? ' · TRACK LIMITS' : ''}</div>
+  <table><tr><th>LAP</th><th>TIME</th><th>S1</th><th>S2</th><th>S3</th><th>PEN</th></tr>${rows || '<tr><td colspan="6">NO COMPLETE LAP</td></tr>'}</table>
+  <div class="sub">SESSION BEST ${sessionRef[t.id] ? fmt(sessionRef[t.id].time) : '-:--.---'} · BEST SECTORS ${bs.length === 3 ? bs.map(s => s.toFixed(3)).join(' / ') : '—'} · IDEAL LAP ${ideal}</div>
+  <div class="keys">[R] NEW RUN &nbsp; [ESC] MENU</div>`;
+}
 const GAMEKEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
 const PAUSE_HTML = '<h2>PAUSED</h2><div class="keys">[P] RESUME &nbsp; [H] HELP &nbsp; [O] OPTIONS &nbsp; [R] RESTART &nbsp; [ESC] MENU</div>';
 function settingsKeys(e) {
@@ -939,7 +1074,12 @@ function menuShortcut(e) {
   const laps = { Digit1: 1, Digit3: 3, Digit5: 5, Digit0: 10, Numpad1: 1, Numpad3: 3, Numpad5: 5, Numpad0: 10 }[e.code];
   const diff = { KeyR: 'ROOKIE', KeyN: 'NORMAL', KeyP: 'PRO' }[e.code];
   const cam = { KeyF: 'FIXED', KeyC: 'CHASE' }[e.code];
-  if (laps) opt.laps = laps;
+  const ncars = { Digit2: 2, Digit4: 4, Digit6: 6, Digit8: 8, Numpad2: 2, Numpad4: 4, Numpad6: 6, Numpad8: 8 }[e.code];
+  if (ncars) opt.cars = ncars;
+  else if (e.code === 'KeyG') opt.grid = { BACK: 'RANDOM', RANDOM: 'POLE', POLE: 'BACK' }[opt.grid];
+  else if (e.code === 'KeyL') opt.limits = opt.limits ? 0 : 1;
+  else if (e.code === 'KeyQ') opt.mode = opt.mode === 'TT' ? 'RACE' : 'TT';
+  else if (laps) opt.laps = laps;
   else if (diff) opt.diff = diff;
   else if (cam) opt.cam = cam;
   else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); return true; }
@@ -978,6 +1118,7 @@ addEventListener('keydown', e => {
   // overlays that pause the race
   if (overlay === 'settings') { settingsKeys(e); return; }
   if (overlay === 'help') { if (e.code === 'KeyH' || e.code === 'Escape') closeOverlay(); return; }
+  if (overlay === 'summary') { if (e.code === 'Escape') toMenu(); else if (e.code === 'KeyR') startRace(); return; }
   if (overlay === 'pause') {
     if (e.code === 'KeyP') closeOverlay();
     else if (e.code === 'Escape') toMenu();
@@ -991,7 +1132,8 @@ addEventListener('keydown', e => {
     return;
   }
   keys[e.code] = true;
-  if (e.code === 'Escape' || e.code === 'KeyP') openOverlay('pause', PAUSE_HTML);
+  if (e.code === 'Escape' && race.tt) openOverlay('summary', ttSummaryHTML());
+  else if (e.code === 'Escape' || e.code === 'KeyP') openOverlay('pause', PAUSE_HTML);
   else if (e.code === 'KeyH') openOverlay('help', helpHTML());
   else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); }
   else if (e.code === 'Space') { if (!e.repeat) tryRecover(); }
@@ -1040,6 +1182,20 @@ function drawWorld(z) {
   glow(7); ctx.strokeStyle = G; ctx.lineWidth = lw; ctx.stroke(P.L); ctx.stroke(P.R);
   glow(3); ctx.strokeStyle = GD; ctx.stroke(P.Kb); ctx.stroke(P.GR);
   ctx.fillStyle = G; ctx.fill(P.SFf); ctx.strokeStyle = G; ctx.lineWidth = lw * 0.7; ctx.stroke(P.SF); ctx.stroke(P.SFf);
+  glow(2); ctx.strokeStyle = GD; ctx.lineWidth = lw; ctx.stroke(P.Sec);
+  // skid marks: dotted, fading over 4 s
+  glow(0); ctx.fillStyle = GD; const now = performance.now() / 1000, sz = 2.2 * DPR / z;
+  for (const s of skids) { const a = 1 - (now - s.t) / 4; if (a <= 0) continue; ctx.globalAlpha = a * 0.8; ctx.fillRect(s.x - sz / 2, s.y - sz / 2, sz, sz); }
+  ctx.globalAlpha = 1;
+  // ghost: best lap of the session, dashed
+  const Pl = race.player, ref = Pl.ref;
+  if (opt.ghost && ref && race.started && !Pl.fin && (mode === 'race' || mode === 'done')) {
+    const tl = race.t - Pl.lapStart;
+    if (tl <= ref.time + 0.3) {
+      const g = ghostAt(ref, tl);
+      if (g) { ctx.save(); ctx.translate(g.x, g.y); ctx.rotate(g.a); ctx.setLineDash([3 * DPR / z, 3 * DPR / z]); glow(3); ctx.strokeStyle = GD; ctx.lineWidth = lw; ctx.stroke(CAR); ctx.restore(); ctx.setLineDash([]); }
+    }
+  }
   // cars
   for (const c of race.cars) {
     if (c.wait > 0 && (performance.now() / 150 | 0) % 2) continue;
@@ -1049,6 +1205,11 @@ function drawWorld(z) {
     ctx.stroke(CAR);
     ctx.restore();
   }
+  // sparks: short bright streaks
+  glow(10); ctx.strokeStyle = G; ctx.lineWidth = lw;
+  ctx.beginPath();
+  for (const s of sparks) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x - s.vx * 0.035, s.y - s.vy * 0.035); }
+  ctx.stroke();
 }
 function drawLabels() {
   const D = DPR * U;
@@ -1070,6 +1231,7 @@ function drawMinimap() {
   const ox = x0 + (S - (T.maxX - T.minX) * s) / 2 - T.minX * s, oy = y0 + (S - (T.maxY - T.minY) * s) / 2 - T.minY * s;
   ctx.translate(ox, oy); ctx.scale(s, s);
   glow(4); ctx.strokeStyle = GD; ctx.lineWidth = 1.5 * D / s; ctx.stroke(trackPaths(T).C);
+  ctx.strokeStyle = G; ctx.lineWidth = 3 * D / s; ctx.stroke(trackPaths(T).Sec);
   ctx.fillStyle = G;
   for (const c of race.cars) {
     const r = (c.isP ? 4 : 2.6) * D / s;
@@ -1086,18 +1248,32 @@ function drawHUD() {
   const D = DPR * U;
   const P = race.player, st = standings(race.cars), pos = st.indexOf(P) + 1, pad = 16 * D;
   glow(6);
-  const lapShown = clamp(Math.max(1, P.lap), 1, race.laps);
   text(race.track.gp.toUpperCase() + ' · ' + race.track.c.toUpperCase() + ' · ' + (race.track.g === '2026' ? '2026' : race.track.date), pad, pad + 16 * D, 16, GD);
-  text(`LAP ${lapShown}/${race.laps}`, pad, pad + 44 * D, 26);
-  text(`POS ${pos}/4`, pad, pad + 74 * D, 26);
-  const cur = mode === 'race' || mode === 'done' ? (P.fin ? P.finT : race.t) : 0;
-  text('TIME ' + fmt(cur), pad, pad + 100 * D, 16);
+  if (race.tt) {
+    text(`LAP ${Math.max(1, P.lap)}`, pad, pad + 44 * D, 26);
+    text('TIME TRIAL', pad, pad + 74 * D, 26);
+    text('LAP TIME ' + fmt(race.started ? lapTime(P, race) : 0), pad, pad + 100 * D, 16);
+  } else {
+    text(`LAP ${clamp(Math.max(1, P.lap), 1, race.laps)}/${race.laps}`, pad, pad + 44 * D, 26);
+    text(`POS ${pos}/${race.cars.length}`, pad, pad + 74 * D, 26);
+    const cur = mode === 'race' || mode === 'done' ? (P.fin ? P.finT : race.t) : 0;
+    text('TIME ' + fmt(cur), pad, pad + 100 * D, 16);
+  }
   text('LAST ' + fmt(P.last), pad, pad + 120 * D, 16, P.newLap ? G : GD);
   text('BEST ' + fmt(P.best), pad, pad + 140 * D, 16, GD);
+  // sectors of the current lap (the last lap's for a moment after the line); ★ = session best sector
+  const bs = sessionSec[race.track.id] || [], showSec = (!P.cur.length && P.lastSec && P.newLap) ? P.lastSec : P.cur;
+  text([0, 1, 2].map(k => `S${k + 1} ${showSec[k] !== undefined ? showSec[k].toFixed(3) + (showSec[k] === bs[k] ? '★' : '') : '  —  '}`).join('  '), pad, pad + 160 * D, 16, GD);
+  if (P.pen) text(`PENALTIES +${P.pen} S`, pad, pad + 180 * D, 16, G);
+  const dl = liveDelta(P, race);
+  if (dl !== null) { glow(dl < 0 ? 10 : 4); text(`Δ ${dl < 0 ? '−' : '+'}${Math.abs(dl).toFixed(2)}`, pad, pad + 214 * D, 28, dl < 0 ? G : GD); glow(6); }
+  if (P.draft > 0.4 && !P.fin) text('SLIPSTREAM', W / 2, H - pad - 64 * D, 20, G, 'center');
+  if (race.tt && !race.started) { glow(14); text('PRESS ↑ TO START THE CLOCK', W / 2, H * 0.3, 28, G, 'center'); glow(6); }
   // speed
   const kmh = Math.round(Math.abs(P.f) * 0.75);
   text(String(kmh).padStart(3, ' '), pad, H - pad - 26 * D, 48);
   text('KM/H', pad + 92 * D, H - pad - 26 * D, 16, GD);
+  text('GEAR ' + gear, pad + 150 * D, H - pad - 26 * D, 16, GD);
   const bw = 220 * D, frac = clamp(Math.abs(P.f) / VMAX, 0, 1);
   ctx.strokeStyle = GD; ctx.lineWidth = D; ctx.strokeRect(pad, H - pad - 14 * D, bw, 10 * D);
   for (let i = 0; i < 20; i++) if (i / 20 < frac) { ctx.fillStyle = G; ctx.fillRect(pad + 2 * D + i * (bw - 4 * D) / 20, H - pad - 12 * D, (bw - 4 * D) / 20 - 2 * D, 6 * D); }
@@ -1106,10 +1282,11 @@ function drawHUD() {
   else if (mode === 'race' && !P.fin && canRecover(P, race.T)) text((P.off ? 'OFF TRACK' : 'WRONG WAY') + ' · SPACE TO RECOVER', W / 2, H - pad - 30 * D, 22, blink, 'center');
   if (P.newLap && P.lap === race.laps && !P.fin) text('FINAL LAP', W / 2, H * 0.28, 30, G, 'center');
   if (msgT > 0) text(msg, W / 2, H * 0.18, 18, G, 'center');
-  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · F/C CAMERA · H HELP · O OPTIONS · P PAUSE · ESC MENU', W / 2, H - 9 * D, 14, GD, 'center');
+  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · F/C CAMERA · H HELP · O OPTIONS · P PAUSE · ESC ' + (race.tt ? 'END RUN' : 'MENU'), W / 2, H - 9 * D, 14, GD, 'center');
 }
 function drawLights() {
   const D = DPR * U;
+  if (race.tt) return;
   const n = mode === 'lights' ? Math.min(5, Math.floor(lightsT / 0.8)) : 0;
   const show = mode === 'lights' || (mode === 'race' && race.t < 1.2);
   if (!show) return;
@@ -1161,18 +1338,61 @@ function update(dt) {
   }
   const P0 = race.player; P0.steerLv = opt.steer; P0.brakeLv = opt.brake;
   const inp = playerInput();
+  if (race.tt && !race.started) { if (inp.thr) race.started = true; else { engineUpdate(P0, inp); return; } }
   const H2 = 1 / 120; acc += dt;
   while (acc >= H2) { simTick(race, inp, H2); acc -= H2; }
   const P = race.player;
+  // events from the simulation
+  if (P.limitEvent) { P.limitEvent = false; flash(`TRACK LIMITS · +${LIMIT_PENALTY} S`); beep(220, 0.2); }
+  const bs = sessionSec[race.track.id] || (sessionSec[race.track.id] = []);
+  for (const src of [P.cur, P.lapEvent ? P.lastSec : null]) if (src) src.forEach((s, k) => { if (s !== undefined && !(s >= bs[k])) bs[k] = s; });
+  if (P.lapEvent) P.lapEvent = false;
+  if (P.newRef) { P.newRef = false; const old = sessionRef[race.track.id]; sessionRef[race.track.id] = P.ref; if (old) flash('NEW SESSION BEST · ' + fmt(P.ref.time)); }
+  for (const c of race.cars) { if (c.limitEvent && !c.isP) c.limitEvent = false; }
+  updateEffects(dt);
   if (P.fin && mode === 'race') { mode = 'done'; race.doneAt = race.t; }
   if (mode === 'done') {
     if (!race.doneShown && race.t - race.doneAt > 1.2) { race.doneShown = true; openOverlay('results', resultsHTML()); }
     else if (race.doneShown && race.t - (race.panelT || 0) > 0.5) { race.panelT = race.t; panel.innerHTML = resultsHTML(); }
   }
-  if (engG) {
-    engG.gain.setTargetAtTime(muted ? 0 : 0.025, AC.currentTime, 0.05);
-    eng.frequency.setTargetAtTime(45 + Math.abs(P.f) * 0.55 + (P.off ? 10 * Math.random() : 0), AC.currentTime, 0.03);
+  engineUpdate(P, inp);
+}
+// skid marks (rear wheels when sliding or braking hard) and sparks (barrier hits, contacts)
+function updateEffects(dt) {
+  const now = performance.now() / 1000;
+  for (const c of race.cars) {
+    if ((c.slip > 30 || c.braking) && Math.abs(c.f) > 50 && !c.off) {
+      const ca = Math.cos(c.a), sa = Math.sin(c.a);
+      for (const sd of [-7, 7]) skids.push({ x: c.x - 9 * ca - sd * sa, y: c.y - 9 * sa + sd * ca, t: now });
+    }
+    if (c.spark) {
+      for (let k = 0; k < 7; k++) { const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 160; sparks.push({ x: c.spark.x, y: c.spark.y, vx: Math.cos(a) * v + c.vx * 0.5, vy: Math.sin(a) * v + c.vy * 0.5, life: 0.25 + Math.random() * 0.2 }); }
+      c.spark = null;
+    }
   }
+  if (skids.length > 2400) skids.splice(0, skids.length - 2400);
+  while (skids.length && now - skids[0].t > 4) skids.shift();
+  for (const s of sparks) { s.x += s.vx * dt; s.y += s.vy * dt; s.vx *= 0.92; s.vy *= 0.92; s.life -= dt; }
+  sparks = sparks.filter(s => s.life > 0);
+}
+// engine: 8 gears; pitch climbs through each gear and drops at every upshift
+const GEAR_TOP = [0.19, 0.31, 0.43, 0.55, 0.67, 0.79, 0.9, 1.06].map(k => k * VMAX);
+let shiftUntil = 0;
+function engineUpdate(P, inp) {
+  if (!engG) return;
+  const now = AC.currentTime, v = Math.abs(P.f);
+  const prev = gear;
+  if (gear < 8 && v > GEAR_TOP[gear - 1] * 0.97) gear++;
+  else if (gear > 1 && v < GEAR_TOP[gear - 2] * 0.8) gear--;
+  const lo = gear === 1 ? 0 : GEAR_TOP[gear - 2] * 0.8, hi = GEAR_TOP[gear - 1];
+  const rpm = clamp(0.3 + 0.7 * (v - lo) / (hi - lo), 0.25, 1);
+  const rough = P.off && v > 20 ? 18 * (Math.random() - 0.5) : 0;
+  const f0 = 50 + 175 * rpm + rough;
+  eng.frequency.setTargetAtTime(f0, now, 0.02); eng2.frequency.setTargetAtTime(f0 * 1.5, now, 0.02);
+  engLp.frequency.setTargetAtTime(500 + 1500 * rpm * (inp.thr ? 1 : 0.55), now, 0.05);
+  const target = muted ? 0 : 0.016 + 0.014 * inp.thr;
+  if (gear > prev && !muted) { engG.gain.setTargetAtTime(0.004, now, 0.01); shiftUntil = now + 0.07; }
+  else if (now >= shiftUntil) engG.gain.setTargetAtTime(target, now, 0.05);
 }
 function frame(ts) {
   const dt = Math.min(0.05, (ts - (lastTs || ts)) / 1000); lastTs = ts;
