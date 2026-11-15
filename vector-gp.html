@@ -66,7 +66,7 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 #panel table.set tr.cur .mk{visibility:visible}
 #panel table.set tr.note td{padding:0 8px 10px;font-size:15px;color:var(--gd)}
 #panel button{padding:2px 10px}
-#panel{max-width:96vw;max-height:94vh;overflow:auto}
+#panel{max-width:96vw;max-height:94vh;overflow:auto;background:rgba(0,0,0,.96)!important}
 #panel .cols td,#panel .cols th{white-space:nowrap;padding:3px 10px}
 .pip{display:inline-block;width:18px;height:12px;border:1px solid var(--gd);margin-right:4px}
 .pip.on{background:var(--g);border-color:var(--g);box-shadow:0 0 6px var(--g)}
@@ -82,13 +82,13 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
   <div class="bar">
     <div id="selname"></div>
     <div class="opt"><span>LAPS</span><button data-o="laps" data-v="1">1</button><button data-o="laps" data-v="3">3</button><button data-o="laps" data-v="5">5</button><button data-o="laps" data-v="10">10</button></div>
-    <div class="opt"><span>AI</span><button data-o="diff" data-v="EASY">EASY</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="HARD">HARD</button></div>
+    <div class="opt"><span>AI</span><button data-o="diff" data-v="ROOKIE">ROOKIE</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="PRO">PRO</button></div>
     <div class="opt"><span>CAMERA</span><button data-o="cam" data-v="FIXED">FIXED</button><button data-o="cam" data-v="CHASE">CHASE</button></div>
-    <button id="setbtn">SETTINGS</button>
+    <button id="setbtn">OPTIONS</button>
     <button id="go">START ▶</button>
   </div>
   <div id="grid"></div>
-  <div class="foot">ARROWS SELECT · ENTER OR DOUBLE-CLICK OPENS THE CIRCUIT · O SETTINGS · YOUR SETTINGS ARE KEPT IN THE PAGE ADDRESS (#CODE): BOOKMARK IT<br>
+  <div class="foot">ARROWS SELECT · ENTER OR DOUBLE-CLICK OPENS THE CIRCUIT · 1 3 5 0 LAPS · R N P AI · F C CAMERA · O OPTIONS · H HELP · V MUSIC · SETTINGS ARE KEPT IN THE PAGE ADDRESS (#CODE): BOOKMARK IT<br>
   Bahrain and Saudi Arabia were cancelled from the 2026 calendar but stay playable. Circuit outlines come from surveyed geometry (bacinger/f1-circuits, MIT licence), smoothed and widened for the game, with real lengths, start lines and racing directions.</div>
 </div>
 <div id="panel"></div>
@@ -96,7 +96,7 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
   <div class="main"><canvas id="dmap"></canvas><div id="dinfo"></div></div>
   <div class="dopts">
     <div class="opt"><span>LAPS</span><button data-o="laps" data-v="1">1</button><button data-o="laps" data-v="3">3</button><button data-o="laps" data-v="5">5</button><button data-o="laps" data-v="10">10</button></div>
-    <div class="opt"><span>AI</span><button data-o="diff" data-v="EASY">EASY</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="HARD">HARD</button></div>
+    <div class="opt"><span>AI</span><button data-o="diff" data-v="ROOKIE">ROOKIE</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="PRO">PRO</button></div>
     <div class="opt"><span>CAMERA</span><button data-o="cam" data-v="FIXED">FIXED</button><button data-o="cam" data-v="CHASE">CHASE</button></div>
   </div>
   <div class="nav"><button id="dprev">◀ PREV</button><button id="dback">BACK [ESC]</button><span class="sp" id="dpos"></span><button id="dgo">START ▶ [ENTER]</button><button id="dnext">NEXT ▶</button></div>
@@ -108,7 +108,7 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 <div class="vig"></div><div class="scan"></div>
 <script>
 'use strict';
-/* VECTOR GP v2.2 — single-file browser racing game */
+/* VECTOR GP v2.3 — single-file browser racing game */
 /* Circuit geometry derived from bacinger/f1-circuits (https://github.com/bacinger/f1-circuits)
    Copyright (c) 2019-2025 Tomislav Bacinger, MIT License. Smoothed and widened for gameplay. */
 const TRACKS=[
@@ -160,7 +160,7 @@ const STEP = 10;               // centerline sample spacing
 const HALF = 44;               // half track width
 const WALL = HALF + 70;        // barrier distance from centerline
 const VMAX = 440, ACC = 330, BRK = 700, TR = 2.9;
-const DIFF = { EASY: [.80, .83, .86], NORMAL: [.88, .91, .94], HARD: [.95, .98, 1.0] };
+const DIFF = { ROOKIE: [.80, .83, .86], NORMAL: [.88, .91, .94], PRO: [.95, .98, 1.0] };
 // player driving aids, levels 1..5 (3 = neutral)
 const STEER_RATE = [0.75, 0.88, 1, 1.12, 1.25];   // how hard the car can turn
 const STEER_RAMP = [3.5, 5, 7, 9.5, 12];           // how fast the steering reaches full lock (per s)
@@ -376,7 +376,7 @@ function decodeSettings(code, tracks) {
     let m;
     if (tracks.some(t => t.id === p)) o.track = p;
     else if ((m = /^L(1|3|5|10)$/.exec(p))) o.laps = +m[1];
-    else if (p === 'E' || p === 'N' || p === 'H') o.diff = { E: 'EASY', N: 'NORMAL', H: 'HARD' }[p];
+    else if ('RNPEH'.includes(p) && p.length === 1) o.diff = { R: 'ROOKIE', N: 'NORMAL', P: 'PRO', E: 'ROOKIE', H: 'PRO' }[p];   // E/H: v2.1-2.2 codes
     else if (p === 'F' || p === 'C') o.cam = p === 'F' ? 'FIXED' : 'CHASE';
     else if ((m = /^S([1-5])$/.exec(p))) o.steer = +m[1];
     else if ((m = /^B([1-5])$/.exec(p))) o.brake = +m[1];
@@ -388,6 +388,97 @@ function decodeSettings(code, tracks) {
 function standings(cars) {
   return cars.slice().sort((a, b) => (a.fin && b.fin) ? a.finT - b.finT : a.fin ? -1 : b.fin ? 1 : b.prog - a.prog);
 }
+
+// ===== CIRCUIT MUSIC: opening phrases in chiptune style =====
+// Notes: NAME+octave/beats (R = rest). bpm = quarter notes per minute, bar = beats per bar
+// (for the bass), pk = pickup beats, tr = transpose in semitones.
+// Anthems are used only where the music is in the public domain (first published before
+// 1929); elsewhere a public-domain piece or an original theme in the style of the region.
+const SCORES = {
+  GBR: { kind: 'ANTHEM', title: 'God Save the King', bpm: 76, bar: 3,
+    n: 'G4/1 G4/1 A4/1 F#4/1.5 G4/0.5 A4/1 B4/1 B4/1 C5/1 B4/1.5 A4/0.5 G4/1 A4/1 G4/1 F#4/1 G4/3 D5/1 D5/1 D5/1 D5/1.5 C5/0.5 B4/1 C5/1 C5/1 C5/1 C5/1.5 B4/0.5 A4/1 B4/1 C5/0.5 B4/0.5 A4/0.5 G4/0.5 B4/1.5 C5/0.5 D5/1 E5/0.5 C5/0.5 B4/1 A4/1 G4/3' },
+  USA: { kind: 'ANTHEM', title: 'The Star-Spangled Banner', bpm: 92, bar: 3, pk: 1, tr: 5,
+    n: 'F4/0.75 D4/0.25 Bb3/1 D4/1 F4/1 Bb4/2 D5/0.75 C5/0.25 Bb4/1 D4/1 E4/1 F4/2 F4/0.5 F4/0.5 D5/1.5 C5/0.5 Bb4/1 A4/2 G4/0.75 A4/0.25 Bb4/1 Bb4/1 F4/1 D4/1 Bb3/1 R/1' },
+  FRA: { kind: 'ANTHEM', title: 'La Marseillaise', bpm: 100, bar: 4, pk: 1, tr: 5,
+    n: 'D4/0.375 D4/0.125 D4/0.5 G4/1 G4/1 A4/1 A4/1 D5/1.5 B4/0.5 G4/0.75 G4/0.25 B4/0.75 G4/0.25 E4/1 C5/2 A4/0.75 F#4/0.25 G4/2 R/2' },
+  GER: { kind: 'ANTHEM', title: 'Das Lied der Deutschen (Haydn)', bpm: 76, bar: 4,
+    n: 'G4/1.5 A4/0.5 B4/1 A4/1 C5/1 B4/1 A4/0.5 F#4/0.5 G4/1 E5/1 D5/1 C5/1 B4/1 A4/0.5 B4/0.5 G4/1 D5/2 G4/1.5 A4/0.5 B4/1 A4/1 C5/1 B4/1 A4/0.5 F#4/0.5 G4/1 E5/1 D5/1 C5/1 B4/1 A4/0.5 B4/0.5 G4/1 D5/2' },
+  CAN: { kind: 'ANTHEM', title: 'O Canada', bpm: 80, bar: 4, tr: 5,
+    n: 'E4/2 G4/1.5 G4/0.5 C4/3 D4/1 E4/1 F4/1 G4/1 A4/1 D4/3 E4/1 F#4/1 G4/1 A4/1 B4/1 C5/3 R/1' },
+  AUS: { kind: 'ANTHEM', title: 'Advance Australia Fair', bpm: 96, bar: 4, pk: 1,
+    n: 'D4/1 G4/1 D4/1 B3/1 D4/1 G4/1.5 A4/0.5 B4/1 G4/1 C5/1 B4/1 A4/1 G4/1 F#4/3 D4/1 G4/1 D4/1 B3/1 D4/1 G4/1.5 A4/0.5 B4/1 G4/1 A4/1 A4/1 B4/1 A4/1 G4/3 R/1' },
+  JPN: { kind: 'ANTHEM', title: 'Kimigayo', bpm: 66, bar: 4, tr: 5,
+    n: 'D4/1 C4/1 D4/1 E4/1 G4/1 E4/1 D4/2 E4/1 G4/1 A4/1 G4/0.5 A4/0.5 D5/1 B4/1 A4/1 G4/1 E4/1 G4/1 A4/2 D5/1 C5/1 D5/2 E5/1 G5/1 E5/1 D5/1 E5/1 A4/1 B4/1 A4/0.5 G4/0.5 E4/1 A4/1 G4/2 R/2' },
+  ITA: { kind: 'ANTHEM', title: "Il Canto degli Italiani", bpm: 112, bar: 4, tr: 3,
+    n: 'G4/0.75 G4/0.25 A4/0.75 G4/0.25 E5/1 E5/1 E5/0.75 E5/0.25 F5/0.75 E5/0.25 D5/1 D5/1 D5/0.75 D5/0.25 E5/0.75 D5/0.25 B4/1 G4/1 C5/0.75 C5/0.25 D5/0.75 C5/0.25 A4/1 R/1' },
+  AUT: { kind: 'MUSIC', title: 'J. Strauss II · The Blue Danube (1867)', bpm: 150, bar: 3,
+    n: 'D4/1 D4/1 F#4/1 A4/2 A4/1 A5/2 A5/1 F#5/2 F#5/1 D4/1 D4/1 F#4/1 A4/2 A4/1 A5/2 A5/1 G5/2 G5/1 C#4/1 C#4/1 E4/1 B4/2 B4/1 B5/2 B5/1 G5/2 G5/1 C#4/1 C#4/1 E4/1 B4/2 B4/1 B5/2 B5/1 F#5/2 F#5/1' },
+  TUR: { kind: 'MUSIC', title: 'Mozart · Rondo alla Turca (1783)', bpm: 120, bar: 2, tr: -12,
+    n: 'B4/0.25 A4/0.25 G#4/0.25 A4/0.25 C5/1 D5/0.25 C5/0.25 B4/0.25 C5/0.25 E5/1 F5/0.25 E5/0.25 D#5/0.25 E5/0.25 B5/0.25 A5/0.25 G#5/0.25 A5/0.25 B5/0.25 A5/0.25 G#5/0.25 A5/0.25 C6/1 A5/0.5 C6/0.5 B5/0.5 A5/0.5 G5/0.5 A5/0.5 B5/0.5 A5/0.5 G5/0.5 A5/0.5 B5/0.5 A5/0.5 G5/0.5 F#5/0.5 E5/1 R/1' },
+  RUS: { kind: 'MUSIC', title: 'Korobeiniki (traditional)', bpm: 140, bar: 4,
+    n: 'E5/1 B4/0.5 C5/0.5 D5/1 C5/0.5 B4/0.5 A4/1 A4/0.5 C5/0.5 E5/1 D5/0.5 C5/0.5 B4/1.5 C5/0.5 D5/1 E5/1 C5/1 A4/1 A4/2 R/0.5 D5/1 F5/0.5 A5/1 G5/0.5 F5/0.5 E5/1.5 C5/0.5 E5/1 D5/0.5 C5/0.5 B4/1 B4/0.5 C5/0.5 D5/1 E5/1 C5/1 A4/1 A4/2' },
+  CHN: { kind: 'MUSIC', title: 'Mo Li Hua · Jasmine Flower (traditional)', bpm: 72, bar: 4, tr: -12,
+    n: 'E5/0.5 E5/0.25 G5/0.25 A5/0.25 C6/0.25 C6/0.25 A5/0.25 G5/0.5 G5/0.25 A5/0.25 G5/1 E5/0.5 E5/0.25 G5/0.25 A5/0.25 C6/0.25 C6/0.25 A5/0.25 G5/0.5 G5/0.25 A5/0.25 G5/1 G5/0.5 G5/0.5 G5/0.5 E5/0.25 G5/0.25 A5/0.5 A5/0.5 G5/1 E5/0.5 D5/0.25 E5/0.25 G5/0.5 E5/0.25 D5/0.25 C5/0.5 C5/0.25 D5/0.25 C5/1 R/1' },
+  MON: { kind: 'MUSIC', title: 'Offenbach · Galop infernal (1858)', bpm: 160, bar: 4, tr: 12,
+    n: 'C4/2 D4/0.5 F4/0.5 E4/0.5 D4/0.5 G4/1 G4/1 G4/0.5 A4/0.5 E4/0.5 F4/0.5 D4/1 D4/1 D4/0.5 F4/0.5 E4/0.5 D4/0.5 C4/0.5 C5/0.5 B4/0.5 A4/0.5 G4/0.5 F4/0.5 E4/0.5 D4/0.5 C4/2 D4/0.5 F4/0.5 E4/0.5 D4/0.5 G4/1 G4/1 G4/0.5 A4/0.5 E4/0.5 F4/0.5 D4/1 D4/1 D4/0.5 F4/0.5 E4/0.5 D4/0.5 C4/0.5 G4/0.5 D4/0.5 E4/0.5 C4/1 R/1' },
+  ESP: { kind: 'MUSIC', title: 'Bizet · Toreador Song (1875)', bpm: 100, bar: 4,
+    n: 'C5/1 D5/0.75 C5/0.25 A4/1 A4/1 A4/0.75 G4/0.25 A4/0.75 Bb4/0.25 A4/2 Bb4/1 G4/0.75 C5/0.25 A4/2 F4/1 D4/0.75 G4/0.25 C4/2 R/1' },
+  MEX: { kind: 'MUSIC', title: 'La Cucaracha (traditional)', bpm: 180, bar: 3, tr: 12,
+    n: 'C4/0.5 C4/0.5 C4/0.5 F4/1.5 A4/1 C4/0.5 C4/0.5 C4/0.5 F4/1.5 A4/1.5 R/1 F4/0.5 F4/0.5 E4/0.5 E4/0.5 D4/0.5 D4/0.5 C4/2.5 R/0.5 C4/0.5 C4/0.5 C4/0.5 E4/1.5 G4/1 C4/0.5 C4/0.5 C4/0.5 E4/1.5 G4/1.5 R/1 C5/0.5 D5/0.5 C5/0.5 Bb4/0.5 A4/0.5 G4/0.5 F4/2 R/1' },
+  // original themes in the style of the region (written for VECTOR GP)
+  ARAB: { kind: 'MUSIC', title: 'Original theme · Arabian (Hijaz mode)', bpm: 100, bar: 4, tr: 12,
+    n: 'D4/0.5 Eb4/0.5 F#4/1 G4/0.5 F#4/0.5 Eb4/1 D4/0.5 Eb4/0.5 F#4/0.5 G4/0.5 A4/2 Bb4/0.5 A4/0.5 G4/0.5 F#4/0.5 G4/1 A4/1 Bb4/0.5 C5/0.5 Bb4/0.5 A4/0.5 G4/0.5 F#4/0.5 Eb4/0.5 F#4/0.5 D4/2 R/1' },
+  MALAY: { kind: 'MUSIC', title: 'Original theme · Malay pentatonic', bpm: 112, bar: 4, tr: 12,
+    n: 'E4/0.5 G4/0.5 A4/1 G4/0.5 E4/0.5 D4/1 C4/0.5 D4/0.5 E4/0.5 G4/0.5 E4/2 A4/0.5 C5/0.5 D5/1 C5/0.5 A4/0.5 G4/1 E4/0.5 G4/0.5 D4/0.5 E4/0.5 C4/2 R/1' },
+  BEL: { kind: 'MUSIC', title: 'Original theme · Flemish carillon', bpm: 120, bar: 3,
+    n: 'C5/1 E5/1 G5/1 C6/2 G5/1 A5/1 G5/1 F5/1 E5/3 D5/1 F5/1 A5/1 G5/2 E5/1 F5/1 D5/1 B4/1 C5/3' },
+  HUN: { kind: 'MUSIC', title: 'Original theme · csárdás', bpm: 90, bar: 4, tr: -12,
+    n: 'A4/0.5 D5/0.5 F5/0.5 A5/0.5 G5/1 F5/0.5 E5/0.5 F5/1 D5/1 R/0.5 C#5/0.5 E5/0.5 G5/0.5 Bb5/1 A5/0.5 G5/0.5 F5/0.5 E5/0.5 D5/2 R/1' },
+  NED: { kind: 'MUSIC', title: 'Original theme · Dutch street organ waltz', bpm: 150, bar: 3, tr: -12,
+    n: 'G4/1 C5/1 E5/1 G5/2 E5/1 F5/1 E5/1 D5/1 C5/3 A4/1 D5/1 F5/1 A5/2 F5/1 G5/1 F5/1 E5/1 D5/3 G4/1 C5/1 E5/1 G5/2 C6/1 B5/1 A5/1 G5/1 F5/2 D5/1 E5/1 D5/1 B4/1 C5/3' },
+  POR: { kind: 'MUSIC', title: 'Original theme · fado', bpm: 76, bar: 4, tr: 5,
+    n: 'E4/1 A4/0.5 B4/0.5 C5/1 B4/0.5 A4/0.5 G#4/1 A4/0.5 B4/0.5 E4/2 F4/1 E4/0.5 D4/0.5 C4/1 D4/0.5 E4/0.5 B3/1 C4/0.5 B3/0.5 A3/2' },
+  BRA: { kind: 'MUSIC', title: 'Original theme · samba', bpm: 104, bar: 2,
+    n: 'G4/0.5 A4/0.25 B4/0.5 D5/0.75 B4/0.5 A4/0.25 G4/0.5 E4/0.75 R/0.5 G4/0.5 A4/0.25 B4/0.5 D5/0.75 E5/0.5 D5/0.25 B4/0.5 A4/0.75 R/0.5 C5/0.5 B4/0.25 A4/0.5 G4/0.75 A4/0.5 B4/0.25 G4/0.5 E4/0.75 D4/0.5 G4/2 R/0.5' },
+  AZE: { kind: 'MUSIC', title: 'Original theme · Azerbaijani (Shur mode)', bpm: 84, bar: 4, tr: 5,
+    n: 'A4/1 G4/0.5 F4/0.5 E4/1 F4/0.5 G4/0.5 A4/1.5 Bb4/0.5 A4/1 G4/1 F4/0.5 E4/0.5 D4/1 E4/0.5 F4/0.5 G4/0.5 F4/0.5 E4/1 D4/2 R/1' },
+  RSA: { kind: 'MUSIC', title: 'Original theme · South African choral hymn', bpm: 72, bar: 4,
+    n: 'G4/1 G4/1 A4/1 B4/1 C5/2 B4/1 A4/1 G4/1 A4/1 B4/1 G4/1 E4/3 R/1 D4/1 G4/1 G4/1 A4/1 B4/2 C5/1 D5/1 C5/1 B4/1 A4/1 B4/1 G4/3 R/1' },
+  ARG: { kind: 'MUSIC', title: 'Original theme · tango', bpm: 112, bar: 4,
+    n: 'D5/0.75 D5/0.25 D5/0.5 C#5/0.5 D5/1 A4/1 Bb4/0.75 A4/0.25 G4/0.5 F4/0.5 E4/2 C#5/0.75 C#5/0.25 C#5/0.5 B4/0.5 C#5/1 A4/1 G4/0.75 F4/0.25 E4/0.5 D4/0.5 A4/2 R/1' },
+};
+const TRACK_MUSIC = {
+  AUS: 'AUS', CHN: 'CHN', JPN: 'JPN', BHR: 'ARAB', SAU: 'ARAB', MIA: 'USA', CAN: 'CAN', MON: 'MON', ESP: 'ESP',
+  AUT: 'AUT', GBR: 'GBR', BEL: 'BEL', HUN: 'HUN', NED: 'NED', ITA: 'ITA', MAD: 'ESP', AZE: 'AZE', SGP: 'MALAY',
+  USA: 'USA', MEX: 'MEX', BRA: 'BRA', LVS: 'USA', QAT: 'ARAB', ABU: 'ARAB',
+  IMO: 'ITA', MAL: 'MALAY', TUR: 'TUR', GER: 'GER', EUR: 'GER', FRA: 'FRA', PRI: 'FRA', POR: 'POR', ALG: 'POR',
+  TUS: 'ITA', RUS: 'RUS', IND: 'USA', WGI: 'USA', RSA: 'RSA', BRJ: 'BRA', ARG: 'ARG'
+};
+const NOTE_I = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+function midiOf(n) {
+  const m = /^([A-G])([#b]?)(-?\d)$/.exec(n);
+  if (!m) throw new Error('bad note ' + n);
+  return 12 * (+m[3] + 1) + NOTE_I[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
+}
+// melody events + an automatic bass (the melody's note class, low, on each bar / half bar)
+function parseScore(sc) {
+  if (sc.ev) return sc;
+  let t = 0; const ev = [];
+  for (const tok of sc.n.trim().split(/\s+/)) {
+    const [p, d] = tok.split('/'); const dur = +d;
+    if (!(dur > 0)) throw new Error('bad duration ' + tok);
+    if (p !== 'R') ev.push({ t, d: dur, m: midiOf(p) + (sc.tr || 0) });
+    t += dur;
+  }
+  const bass = [], step = sc.bar === 4 ? 2 : sc.bar;
+  for (let b = sc.pk || 0; b < t - 0.01; b += step) {
+    let e = ev.find(e => e.t <= b + 1e-6 && b < e.t + e.d - 1e-6) || ev.find(e => e.t >= b);
+    if (e) bass.push({ t: b, d: step * 0.9, m: 43 + ((e.m - 43) % 12 + 12) % 12 });   // G2..F#3
+  }
+  sc.ev = ev; sc.bass = bass; sc.len = t;
+  return sc;
+}
+function trackMusic(t) { return SCORES[TRACK_MUSIC[t.id]]; }
 
 // ===== UI / RENDER / INPUT =====
 const G = '#39ff14', GD = '#1c8a0c', GDD = '#0d4a06';
@@ -441,6 +532,55 @@ function beep(f, d) {
   o.type = 'square'; o.frequency.value = f; g.gain.value = 0.06;
   o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime + d);
 }
+
+// ---------- circuit music (menu) ----------
+const music = { timer: null, wait: null, nodes: [], out: null, lp: null, sc: null };
+function playNote(type, midi, t, d, vol) {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.012);
+  g.gain.setTargetAtTime(vol * 0.55, t + 0.02, 0.09); g.gain.setTargetAtTime(0, t + d * 0.88, 0.025);
+  o.connect(g); g.connect(music.out); o.start(t); o.stop(t + d + 0.25);
+  music.nodes.push(o);
+  o.onended = () => { const k = music.nodes.indexOf(o); if (k >= 0) music.nodes.splice(k, 1); g.disconnect(); };
+}
+function musicPass(sc) {
+  const spb = 60 / sc.bpm, t0 = AC.currentTime + 0.08;
+  for (const e of sc.ev) playNote('square', e.m, t0 + e.t * spb, e.d * spb, 0.045);
+  for (const e of sc.bass) playNote('triangle', e.m, t0 + e.t * spb, e.d * spb, 0.10);
+  music.timer = setTimeout(() => { if (music.sc === sc) musicPass(sc); }, (sc.len * spb + 1.5) * 1000);   // loop
+}
+function musicStop() {
+  clearTimeout(music.timer); music.timer = null; music.sc = null;
+  for (const o of music.nodes.slice()) { try { o.stop(); } catch (e) { } }
+  music.nodes = [];
+  if (music.out) { music.out.disconnect(); music.lp.disconnect(); music.out = music.lp = null; }
+}
+function musicStart(sc) {
+  musicStop();
+  if (!AC || AC.state !== 'running' || muted) return;
+  parseScore(sc);
+  music.lp = AC.createBiquadFilter(); music.lp.type = 'lowpass'; music.lp.frequency.value = 3200;
+  music.out = AC.createGain(); music.out.connect(music.lp); music.lp.connect(AC.destination);
+  music.sc = sc; musicPass(sc);
+}
+// in the menu: the highlighted circuit's music starts after 2 s and loops
+function menuMusic() {
+  musicStop(); clearTimeout(music.wait);
+  if (mode !== 'menu' || muted) return;
+  const t = TRACKS[opt.sel];
+  music.wait = setTimeout(() => { if (mode === 'menu' && !muted && TRACKS[opt.sel] === t) musicStart(trackMusic(t)); }, 2000);
+}
+// browsers allow audio only after a click or key press
+function unlockAudio() {
+  const was = AC && AC.state === 'running';
+  audioInit();
+  if (!AC) return;
+  const go = () => { if (!was && AC.state === 'running' && mode === 'menu') menuMusic(); };
+  if (AC.state === 'suspended') AC.resume().then(go); else go();
+}
+addEventListener('pointerdown', unlockAudio, true);
+addEventListener('keydown', unlockAudio, true);
 
 // ---------- precomputed track paths ----------
 function trackPaths(T) {
@@ -583,10 +723,13 @@ function refreshMenu() {
     d.classList.toggle('sel', now); if (!d.drawn || was !== now || d.drawnW !== d.clientWidth) { drawPreview(d.querySelector('canvas'), TRACKS[i], now); d.drawn = 1; d.drawnW = d.clientWidth; } });
   document.querySelectorAll('[data-o]').forEach(b => b.classList.toggle('on', String(opt[b.dataset.o]) === b.dataset.v));
   const t = TRACKS[opt.sel];
-  document.getElementById('selname').textContent = `${cardLabel(t)} — ${t.gp.toUpperCase()} — ${t.c.toUpperCase()}${t.canc ? ' (CANCELLED IN 2026)' : ''}`;
+  const mu = trackMusic(t);
+  document.getElementById('selname').textContent = `${cardLabel(t)} — ${t.gp.toUpperCase()} — ${t.c.toUpperCase()}${t.canc ? ' (CANCELLED IN 2026)' : ''}   ♪ ${muted ? 'MUSIC OFF · V TO TURN ON' : mu.title.toUpperCase()}`;
 }
 function selectTrack(i) {
+  const prev = opt.sel;
   opt.sel = (i + TRACKS.length) % TRACKS.length; writeHash(); refreshMenu();
+  if (opt.sel !== prev) menuMusic();
   cards()[opt.sel].scrollIntoView({ block: 'nearest' });
   if (detailOpen) openDetail();
 }
@@ -611,7 +754,8 @@ function detailInfo() {
     row('CIRCUIT', t.c) + row('LOCATION', t.city) +
     (t.g === '2026' ? row('2026', `ROUND ${String(t.r).padStart(2, '0')} · ${t.date.toUpperCase()}${t.canc ? ' · <b>CANCELLED</b>' : ''}`) : row('F1 YEARS', t.date)) +
     row('LENGTH', t.km.toFixed(3) + ' KM') + row('DIRECTION', direction(t)) +
-    row('RACE', `${opt.laps} LAP${opt.laps > 1 ? 'S' : ''} · ${(opt.laps * t.km).toFixed(1)} KM`) + '</table>';
+    row('RACE', `${opt.laps} LAP${opt.laps > 1 ? 'S' : ''} · ${(opt.laps * t.km).toFixed(1)} KM`) +
+    row(trackMusic(t).kind === 'ANTHEM' ? 'ANTHEM' : 'MUSIC', `${trackMusic(t).title}${muted ? ' · <b>OFF</b> (V)' : ''}`) + '</table>';
   document.getElementById('dpos').textContent = `${opt.sel + 1} / ${TRACKS.length}`;
 }
 function openDetail() {
@@ -654,6 +798,7 @@ function gridCols() { const c = cards(); if (c.length < 2) return 1; const top =
 // ---------- race flow ----------
 function startRace() {
   audioInit(); if (AC && AC.state === 'suspended') AC.resume();
+  musicStop(); clearTimeout(music.wait);
   writeHash();
   const t = TRACKS[opt.sel], T = buildTrack(t); trackPaths(T);
   const sk = DIFF[opt.diff];
@@ -669,7 +814,7 @@ function toMenu() {
   mode = 'menu'; race = null; closeOverlay();
   menuEl.style.display = 'block';
   if (engG) engG.gain.value = 0;
-  buildMenu(); openDetail();
+  buildMenu(); openDetail(); menuMusic();
 }
 function showPanel(html) { panel.innerHTML = html; panel.style.display = 'block'; }
 function openOverlay(kind, html) {
@@ -688,7 +833,7 @@ function settingsHTML() {
     let bar = ''; for (let k = 1; k <= r.n; k++) bar += `<span class="pip${k <= opt[r.k] ? ' on' : ''}"></span>`;
     return `<tr class="${i === settingsRow ? 'cur' : ''}"><td><span class="mk">▶</span>${r.label}</td><td><button data-act="dec" data-k="${r.k}">-</button></td><td class="pips">${bar}</td><td><button data-act="inc" data-k="${r.k}">+</button></td><td>${opt[r.k]}</td></tr><tr class="note"><td></td><td colspan="4">${r.note}</td></tr>`;
   }).join('');
-  return `<h2>SETTINGS</h2><div class="sub">STEERING AND BRAKES AFFECT ONLY YOUR CAR · AI CARS FOLLOW THE AI LEVEL</div><table class="set"><colgroup><col style="width:11em"><col style="width:3.5em"><col><col style="width:3.5em"><col style="width:2.5em"></colgroup>${rows}</table>
+  return `<h2>OPTIONS</h2><div class="sub">STEERING AND BRAKES AFFECT ONLY YOUR CAR · AI CARS FOLLOW THE AI LEVEL</div><table class="set"><colgroup><col style="width:11em"><col style="width:3.5em"><col><col style="width:3.5em"><col style="width:2.5em"></colgroup>${rows}</table>
   <div class="sub">URL CODE #${encodeSettings(opt)}</div><div class="keys">[↑↓] SELECT &nbsp; [←→] CHANGE &nbsp; [O] [ESC] CLOSE</div>`;
 }
 function openSettings() { settingsRow = Math.min(settingsRow, SET_ROWS.length - 1); openOverlay('settings', settingsHTML()); }
@@ -704,9 +849,12 @@ panel.addEventListener('click', e => {
 });
 
 // ---------- help box (in-race) ----------
-const KEYHELP = [['↑ / W', 'THROTTLE'], ['↓ / S', 'BRAKE, THEN REVERSE'], ['← → / A D', 'STEER'], ['SPACE', 'BACK ON TRACK (3 S WAIT)'],
-  ['+ / -', 'ZOOM IN / OUT'], ['M', 'WHOLE CIRCUIT'], ['C', 'CAMERA FIXED / CHASE'], ['H', 'THIS HELP'], ['O', 'SETTINGS'],
+const KEYS_RACE = [['↑ / W', 'THROTTLE'], ['↓ / S', 'BRAKE, THEN REVERSE'], ['← → / A D', 'STEER'], ['SPACE', 'BACK ON TRACK (3 S WAIT)'],
+  ['+ / -', 'ZOOM IN / OUT'], ['M', 'WHOLE CIRCUIT'], ['F / C', 'CAMERA FIXED / CHASE'], ['H', 'THIS HELP'], ['O', 'OPTIONS'],
   ['P', 'PAUSE'], ['V', 'SOUND ON / OFF'], ['R', 'RESTART'], ['ESC', 'PAUSE / MENU']];
+const KEYS_MENU = [['← → ↑ ↓', 'SELECT CIRCUIT'], ['ENTER', 'OPEN CIRCUIT BOX / START RACE'], ['ESC', 'BACK TO THE LIST'],
+  ['1 3 5 0', 'LAPS 1 / 3 / 5 / 10'], ['R N P', 'AI ROOKIE / NORMAL / PRO'], ['F / C', 'CAMERA FIXED / CHASE'],
+  ['O', 'OPTIONS'], ['H', 'THIS HELP'], ['V', 'MUSIC AND SOUND ON / OFF']];
 function gapText(c, lead, i) {
   if (i === 0) return 'LEADER';
   if (c.fin && lead.fin) return '+' + (c.finT - lead.finT).toFixed(3);
@@ -717,10 +865,22 @@ function gapText(c, lead, i) {
   return '+' + ((lead.prog - c.prog) * STEP / v).toFixed(1);
 }
 function helpHTML() {
+  if (!race) {                                   // menu: keys, empty stats
+    const t = TRACKS[opt.sel];
+    const keysT = KEYS_MENU.map(([k, v]) => `<tr><td class="k">${k}</td><td>${v}</td></tr>`).join('');
+    const row = k => `<tr><td>${k}</td><td></td></tr>`;
+    return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()} · NOT RACING</div>
+  <div class="cols"><div><h3>KEYS</h3><table>${keysT}</table></div>
+  <div><h3>STATUS</h3><table>${['LAP', 'POSITION', 'RACE TIME', 'YOUR LAST', 'YOUR BEST', 'FASTEST LAP'].map(row).join('')}
+   <tr><td>OPTIONS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
+   <tr><td>RACE</td><td>${opt.laps} LAP${opt.laps > 1 ? 'S' : ''} · ${opt.diff} · ${opt.cam}</td></tr></table>
+  <h3>LEADERBOARD</h3><table><tr><th>POS</th><th>DRIVER</th><th>GAP</th><th>LAST</th><th>BEST</th></tr></table></div></div>
+  <div class="keys">[H] [ESC] CLOSE</div>`;
+  }
   const P = race.player, st = standings(race.cars);
   const fastest = Math.min(...race.cars.map(c => c.best));
   const fastCar = race.cars.find(c => c.best === fastest);
-  const keysT = KEYHELP.map(([k, v]) => `<tr><td class="k">${k}</td><td>${v}</td></tr>`).join('');
+  const keysT = KEYS_RACE.map(([k, v]) => `<tr><td class="k">${k}</td><td>${v}</td></tr>`).join('');
   const lb = st.map((c, i) => `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${c.isP ? 'YOU' : 'CAR ' + c.num}</td><td>${gapText(c, st[0], i)}</td><td>${fmt(c.last)}</td><td>${fmt(c.best)}</td></tr>`).join('');
   const t = race.track, lapShown = clamp(Math.max(1, P.lap), 1, race.laps);
   return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()}</div>
@@ -732,7 +892,7 @@ function helpHTML() {
    <tr><td>YOUR LAST</td><td>${fmt(P.last)}</td></tr>
    <tr><td>YOUR BEST</td><td>${fmt(P.best)}</td></tr>
    <tr><td>FASTEST LAP</td><td>${isFinite(fastest) ? fmt(fastest) + ' · ' + (fastCar.isP ? 'YOU' : 'CAR ' + fastCar.num) : '-:--.---'}</td></tr>
-   <tr><td>SETTINGS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
+   <tr><td>OPTIONS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
    <tr><td>RACE</td><td>${opt.diff} · ${opt.cam}</td></tr></table>
   <h3>LEADERBOARD</h3><table><tr><th>POS</th><th>DRIVER</th><th>GAP</th><th>LAST</th><th>BEST</th></tr>${lb}</table></div></div>
   <div class="keys">[H] [ESC] CLOSE</div>`;
@@ -758,7 +918,7 @@ function resultsHTML() {
 
 // ---------- input ----------
 const GAMEKEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
-const PAUSE_HTML = '<h2>PAUSED</h2><div class="keys">[P] RESUME &nbsp; [H] HELP &nbsp; [O] SETTINGS &nbsp; [R] RESTART &nbsp; [ESC] MENU</div>';
+const PAUSE_HTML = '<h2>PAUSED</h2><div class="keys">[P] RESUME &nbsp; [H] HELP &nbsp; [O] OPTIONS &nbsp; [R] RESTART &nbsp; [ESC] MENU</div>';
 function settingsKeys(e) {
   if (e.code === 'ArrowUp') settingsRow = (settingsRow + SET_ROWS.length - 1) % SET_ROWS.length;
   else if (e.code === 'ArrowDown') settingsRow = (settingsRow + 1) % SET_ROWS.length;
@@ -769,17 +929,33 @@ function settingsKeys(e) {
   panel.innerHTML = settingsHTML(); return true;
 }
 let settingsFromPause = false;
+// menu shortcuts: change race options without moving the circuit selection
+function menuShortcut(e) {
+  const laps = { Digit1: 1, Digit3: 3, Digit5: 5, Digit0: 10, Numpad1: 1, Numpad3: 3, Numpad5: 5, Numpad0: 10 }[e.code];
+  const diff = { KeyR: 'ROOKIE', KeyN: 'NORMAL', KeyP: 'PRO' }[e.code];
+  const cam = { KeyF: 'FIXED', KeyC: 'CHASE' }[e.code];
+  if (laps) opt.laps = laps;
+  else if (diff) opt.diff = diff;
+  else if (cam) opt.cam = cam;
+  else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); return true; }
+  else if (e.code === 'KeyH') { openOverlay('help', helpHTML()); return true; }
+  else if (e.code === 'KeyV') { muted = !muted; menuMusic(); refreshMenu(); if (detailOpen) detailInfo(); return true; }
+  else return false;
+  writeHash(); refreshMenu(); if (detailOpen) detailInfo();
+  return true;
+}
 addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (mode === 'menu') {
     let handled = true;
     if (overlay === 'settings') handled = settingsKeys(e);
+    else if (overlay === 'help') { if (e.code === 'KeyH' || e.code === 'Escape') closeOverlay(); }
+    else if (menuShortcut(e)) { /* options changed, selection untouched */ }
     else if (detailOpen) {
       if (e.code === 'ArrowRight') selectTrack(opt.sel + 1);
       else if (e.code === 'ArrowLeft') selectTrack(opt.sel - 1);
       else if (e.code === 'Enter') startRace();
       else if (e.code === 'Escape') closeDetail();
-      else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); }
       else handled = false;
     } else {
       const c = gridCols();
@@ -788,7 +964,6 @@ addEventListener('keydown', e => {
       else if (e.code === 'ArrowDown') selectTrack(Math.min(TRACKS.length - 1, opt.sel + c));
       else if (e.code === 'ArrowUp') selectTrack(Math.max(0, opt.sel - c));
       else if (e.code === 'Enter') openDetail();
-      else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); }
       else handled = false;
     }
     if (handled) e.preventDefault();
@@ -818,7 +993,7 @@ addEventListener('keydown', e => {
   else if (e.key === '+' || e.key === '=') { if (opt.zoom < 7) { opt.zoom++; writeHash(); } flash('ZOOM ' + opt.zoom); }
   else if (e.key === '-' || e.key === '_') { if (opt.zoom > 1) { opt.zoom--; writeHash(); } flash('ZOOM ' + opt.zoom); }
   else if (e.code === 'KeyR') startRace();
-  else if (e.code === 'KeyC') { opt.cam = opt.cam === 'FIXED' ? 'CHASE' : 'FIXED'; writeHash(); flash('CAMERA ' + opt.cam); }
+  else if (e.code === 'KeyF' || e.code === 'KeyC') { opt.cam = e.code === 'KeyF' ? 'FIXED' : 'CHASE'; writeHash(); flash('CAMERA ' + opt.cam); }
   else if (e.code === 'KeyM') { fullView = !fullView; flash(fullView ? 'WHOLE CIRCUIT' : 'FOLLOW VIEW'); }
   else if (e.code === 'KeyV') { muted = !muted; flash(muted ? 'SOUND OFF' : 'SOUND ON'); }
 });
@@ -926,7 +1101,7 @@ function drawHUD() {
   else if (mode === 'race' && !P.fin && canRecover(P, race.T)) text((P.off ? 'OFF TRACK' : 'WRONG WAY') + ' · SPACE TO RECOVER', W / 2, H - pad - 30 * D, 22, blink, 'center');
   if (P.newLap && P.lap === race.laps && !P.fin) text('FINAL LAP', W / 2, H * 0.28, 30, G, 'center');
   if (msgT > 0) text(msg, W / 2, H * 0.18, 18, G, 'center');
-  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · H HELP · O SETTINGS · P PAUSE · ESC MENU', W / 2, H - 9 * D, 14, GD, 'center');
+  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · F/C CAMERA · H HELP · O OPTIONS · P PAUSE · ESC MENU', W / 2, H - 9 * D, 14, GD, 'center');
 }
 function drawLights() {
   const D = DPR * U;
@@ -1006,6 +1181,7 @@ function frame(ts) {
 resize();
 buildMenu();
 writeHash();
+menuMusic();
 if (matchMedia('(pointer:coarse)').matches) document.getElementById('touch').style.display = 'block';
 requestAnimationFrame(frame);
 </script>

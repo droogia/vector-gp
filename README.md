@@ -14,10 +14,25 @@ Online: https://droogia.github.io/vector-gp/
 1. Pick a circuit in the list (click or arrow keys). Enter or a double click opens the
    circuit box: a large map with a marker driving a lap, and the circuit's data (Grand Prix,
    location, 2026 round or F1 years, length, direction, race distance).
-2. In the box, set laps (1, 3, 5, 10), AI level (Easy, Normal, Hard) and camera (Fixed,
+2. In the box, set laps (1, 3, 5, 10), AI level (Rookie, Normal, Pro) and camera (Fixed,
    Chase). Left/Right move to the previous/next circuit; Esc goes back to the list.
+   About 2 seconds after a circuit is highlighted, its music starts (see below).
 3. **Start** or Enter starts the race. Wait for the five lights to go out. You start from
    the back of the grid.
+
+In the menu (circuit list and circuit box) these keys change the race options without
+moving the selection:
+
+| Key | Action |
+|---|---|
+| 1 3 5 0 | Laps 1 / 3 / 5 / 10 |
+| R N P | AI level Rookie / Normal / Pro |
+| F / C | Camera Fixed / Chase |
+| O | Options |
+| H | Help (keys; the race stats stay empty) |
+| V | Music and sound on/off |
+
+In the race:
 
 | Key | Action |
 |---|---|
@@ -27,9 +42,9 @@ Online: https://droogia.github.io/vector-gp/
 | Space | Back on track: when off the track or facing backwards, the car is put on the centre line, facing the race direction, and waits 3 seconds (other cars drive through it meanwhile) |
 | + / - | Zoom in / out, 7 levels (7 = closest, the default) |
 | M | Whole circuit view |
-| C | Camera: Fixed (north up) or Chase (car points up) |
+| F / C | Camera: Fixed (north up) / Chase (car points up) |
 | H | Help box: keys, race status and leaderboard (pauses the race) |
-| O | Settings (pauses the race; also available in the menu) |
+| O | Options (pauses the race; also available in the menu) |
 | P | Pause |
 | V | Sound on/off |
 | R | Restart the race |
@@ -38,7 +53,7 @@ Online: https://droogia.github.io/vector-gp/
 All driving controls are on the arrow keys, so the game can be played with one hand.
 On a touch screen, on-screen buttons appear (steer, brake, throttle, back on track).
 
-### Settings
+### Options
 
 | Setting | Levels | Effect |
 |---|---|---|
@@ -54,14 +69,14 @@ The game uses no browser storage. All settings live in the page address, in a re
 code that updates as you change them, for example:
 
 ```
-https://droogia.github.io/vector-gp/#MON-L5-H-C-S2-B4-Z6
+https://droogia.github.io/vector-gp/#MON-L5-N-C-S2-B4-Z6
 ```
 
 | Part | Meaning |
 |---|---|
 | `MON` | Circuit id (see the lists below) |
 | `L5` | Laps: 1, 3, 5 or 10 |
-| `H` | AI level: `E`asy, `N`ormal, `H`ard |
+| `N` | AI level: `R`ookie, `N`ormal, `P`ro (the older `E` and `H` are still read) |
 | `C` | Camera: `F`ixed, `C`hase |
 | `S2` | Steering 1–5 |
 | `B4` | Brakes 1–5 |
@@ -70,6 +85,38 @@ https://droogia.github.io/vector-gp/#MON-L5-H-C-S2-B4-Z6
 Bookmark the address to keep a setup, or share it. Parts can be in any order and are not
 case-sensitive; missing or invalid parts use the defaults (`AUS-L3-N-F-S3-B3-Z7`). Lap times
 are not stored: the HUD and the help box show this race's last, best and fastest laps.
+
+## Music
+
+In the menu, the highlighted circuit's music plays after about 2 seconds: the opening phrase,
+looped, as a chiptune (square-wave melody, triangle bass), written note by note in
+`vector-gp.html` (`SCORES`). Browsers allow sound only after the first click or key press.
+V turns it off.
+
+National anthems are used where the music is in the public domain (published before 1929).
+Elsewhere the circuit gets a public-domain piece or an original theme in the style of the
+region. The melodies were written from memory, so some may differ from the originals.
+
+| Music | Circuits |
+|---|---|
+| Anthem: God Save the King | Silverstone |
+| Anthem: The Star-Spangled Banner | Miami, Austin, Las Vegas, Indianapolis, Watkins Glen |
+| Anthem: La Marseillaise | Magny-Cours, Paul Ricard |
+| Anthem: Das Lied der Deutschen (Haydn) | Hockenheim, Nürburgring |
+| Anthem: Il Canto degli Italiani | Monza, Imola, Mugello |
+| Anthem: O Canada | Montreal |
+| Anthem: Advance Australia Fair | Melbourne |
+| Anthem: Kimigayo | Suzuka |
+| J. Strauss II, The Blue Danube | Red Bull Ring |
+| Bizet, Toreador Song | Barcelona, Madrid |
+| Offenbach, Galop infernal | Monaco |
+| Mozart, Rondo alla Turca | Istanbul |
+| Korobeiniki (traditional) | Sochi |
+| Mo Li Hua, Jasmine Flower (traditional) | Shanghai |
+| La Cucaracha (traditional) | Mexico City |
+| Original theme, Arabian (Hijaz mode) | Bahrain, Jeddah, Lusail, Yas Marina |
+| Original theme, Malay pentatonic | Singapore, Sepang |
+| Original themes | Spa (carillon), Hungaroring (csárdás), Zandvoort (street organ), Baku, Interlagos and Jacarepaguá (samba), Estoril and Portimão (fado), Kyalami (choral hymn), Buenos Aires (tango) |
 
 ## Circuits
 

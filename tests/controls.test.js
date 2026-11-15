@@ -7,7 +7,7 @@ const { TRACKS, buildTrack, makeCar, simTick, recover, canRecover, encodeSetting
 const plain = o => JSON.parse(JSON.stringify(o));   // objects from the game's sandbox -> this realm
 
 test('URL code: readable round trip for every option', () => {
-  for (const track of ['AUS', 'MON', 'IMO']) for (const laps of [1, 3, 5, 10]) for (const diff of ['EASY', 'NORMAL', 'HARD'])
+  for (const track of ['AUS', 'MON', 'IMO']) for (const laps of [1, 3, 5, 10]) for (const diff of ['ROOKIE', 'NORMAL', 'PRO'])
     for (const cam of ['FIXED', 'CHASE']) for (let steer = 1; steer <= 5; steer++) for (const brake of [1, 5]) for (const zoom of [1, 7]) {
       const o = { track, laps, diff, cam, steer, brake, zoom };
       assert.deepStrictEqual(plain(decodeSettings('#' + encodeSettings(o), TRACKS)), o);
@@ -16,8 +16,12 @@ test('URL code: readable round trip for every option', () => {
 });
 
 test('URL code: case-insensitive, invalid parts fall back to defaults', () => {
-  assert.deepStrictEqual(plain(decodeSettings('#mon-l10-h-c-s1-b5-z2', TRACKS)),
-    { track: 'MON', laps: 10, diff: 'HARD', cam: 'CHASE', steer: 1, brake: 5, zoom: 2 });
+  assert.deepStrictEqual(plain(decodeSettings('#mon-l10-p-c-s1-b5-z2', TRACKS)),
+    { track: 'MON', laps: 10, diff: 'PRO', cam: 'CHASE', steer: 1, brake: 5, zoom: 2 });
+  // codes saved by v2.1-2.2 (E = easy, H = hard) still work
+  assert.strictEqual(decodeSettings('AUS-E', TRACKS).diff, 'ROOKIE');
+  assert.strictEqual(decodeSettings('AUS-H', TRACKS).diff, 'PRO');
+  assert.strictEqual(encodeSettings(decodeSettings('AUS-R', TRACKS)), 'AUS-L3-R-F-S3-B3-Z7');
   assert.deepStrictEqual(plain(decodeSettings('#XYZ-L4-S9-B0-Z8-Q', TRACKS)), plain(SETTINGS_DEFAULT));
   assert.deepStrictEqual(plain(decodeSettings('', TRACKS)), plain(SETTINGS_DEFAULT));
 });
