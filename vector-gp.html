@@ -108,7 +108,7 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 <div class="vig"></div><div class="scan"></div>
 <script>
 'use strict';
-/* VECTOR GP v2.4 — single-file browser racing game */
+/* VECTOR GP v2.5 — single-file browser racing game */
 /* Circuit geometry derived from bacinger/f1-circuits (https://github.com/bacinger/f1-circuits)
    Copyright (c) 2019-2025 Tomislav Bacinger, MIT License. Smoothed and widened for gameplay. */
 const TRACKS=[
@@ -165,7 +165,8 @@ const DIFF = { ROOKIE: [.80, .83, .86], NORMAL: [.88, .91, .94], PRO: [.95, .98,
 const STEER_RATE = [0.75, 0.88, 1, 1.12, 1.25];   // how hard the car can turn
 const STEER_RAMP = [3.5, 5, 7, 9.5, 12];           // how fast the steering reaches full lock (per s)
 const BRAKE_LV = [0.70, 0.85, 1, 1.15, 1.30];      // braking force
-const RECOVER_WAIT = 3;                            // seconds frozen after Space puts the car back
+const RECOVER_WAIT = 3;
+const REVERSE_DELAY = 1;                           // seconds stopped (brake held) before reversing                            // seconds frozen after Space puts the car back
 
 function angDiff(a, b) { let d = a - b; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; }
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -266,7 +267,11 @@ function stepCar(c, T, ctl, dt) {
   const off = c.off;
   if (ctl.thr > 0) f += ACC * ctl.thr * Math.max(0, 1 - (f / VMAX) ** 2) * dt;
   const sl = (c.steerLv || 3) - 1, bl = (c.brakeLv || 3) - 1;
-  if (ctl.brk > 0) { if (f > 2) f -= BRK * BRAKE_LV[bl] * ctl.brk * dt; else f = Math.max(-90, f - 160 * ctl.brk * dt); }
+  if (ctl.brk > 0 && !ctl.thr) {
+    if (f > 2) { f -= BRK * BRAKE_LV[bl] * ctl.brk * dt; c.stopT = 0; }
+    else if (f > -2 && (c.stopT || 0) < REVERSE_DELAY) { f = 0; c.stopT = (c.stopT || 0) + dt; }   // stopped: wait before reversing
+    else f = Math.max(-90, f - 160 * ctl.brk * dt);
+  } else { c.stopT = 0; if (ctl.brk > 0) f -= BRK * BRAKE_LV[bl] * ctl.brk * dt * (f > 2 ? 1 : 0); }
   f -= f * (off ? 1.8 : 0.04) * dt;
   if (!ctl.thr && !ctl.brk) f -= f * 0.3 * dt;
   l *= Math.exp(-(off ? 3 : 9) * dt);
@@ -849,7 +854,7 @@ panel.addEventListener('click', e => {
 });
 
 // ---------- help box (in-race) ----------
-const KEYS_RACE = [['↑ / W', 'THROTTLE'], ['↓ / S', 'BRAKE, THEN REVERSE'], ['← → / A D', 'STEER'], ['SPACE', 'BACK ON TRACK (3 S WAIT)'],
+const KEYS_RACE = [['↑ / W', 'THROTTLE'], ['↓ / S', 'BRAKE · HOLD 1 S WHEN STOPPED TO REVERSE'], ['← → / A D', 'STEER'], ['SPACE', 'BACK ON TRACK (3 S WAIT)'],
   ['+ / -', 'ZOOM IN / OUT'], ['M', 'WHOLE CIRCUIT'], ['F / C', 'CAMERA FIXED / CHASE'], ['H', 'THIS HELP'], ['O', 'OPTIONS'],
   ['P', 'PAUSE'], ['V', 'SOUND ON / OFF'], ['R', 'RESTART'], ['ESC', 'PAUSE / MENU']];
 const KEYS_MENU = [['← → ↑ ↓', 'SELECT CIRCUIT'], ['ENTER', 'OPEN CIRCUIT BOX / START RACE'], ['ESC', 'BACK TO THE LIST'],

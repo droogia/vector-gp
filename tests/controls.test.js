@@ -87,3 +87,19 @@ test('AI cars are not affected by the player settings', () => {
   const ai = makeCar(T, 0, false, 1, 2);
   assert.strictEqual(ai.steerLv, undefined); assert.strictEqual(ai.brakeLv, undefined);
 });
+
+test('reverse: after stopping, brake must be held for REVERSE_DELAY before reversing', () => {
+  const { c, race } = player('ITA');
+  const tick = (input, s) => { for (let i = 0; i < Math.round(s * 120); i++) simTick(race, input, 1 / 120); };
+  tick({ thr: 1, brk: 0, steer: 0 }, 2);
+  let s = 0; while (c.f > 0.01 && s < 2000) { simTick(race, { thr: 0, brk: 1, steer: 0 }, 1 / 120); s++; }
+  tick({ thr: 0, brk: 1, steer: 0 }, core.REVERSE_DELAY - 0.15);
+  assert.ok(c.f >= 0, `still stopped just before the delay (${c.f.toFixed(2)})`);
+  tick({ thr: 0, brk: 1, steer: 0 }, 0.6);
+  assert.ok(c.f < -5, `reversing after the delay (${c.f.toFixed(2)})`);
+  // releasing the brake resets the wait
+  tick({ thr: 0, brk: 0, steer: 0 }, 1.5); tick({ thr: 1, brk: 0, steer: 0 }, 1.5);
+  s = 0; while (c.f > 0.01 && s < 2000) { simTick(race, { thr: 0, brk: 1, steer: 0 }, 1 / 120); s++; }
+  tick({ thr: 0, brk: 1, steer: 0 }, 0.5);
+  assert.ok(c.f >= 0, 'the wait starts again from zero');
+});

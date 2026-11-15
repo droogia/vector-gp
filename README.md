@@ -38,7 +38,7 @@ In the race:
 | Key | Action |
 |---|---|
 | ↑ / W | Throttle |
-| ↓ / S | Brake, then reverse once stopped |
+| ↓ / S | Brake; keep it held for 1 second after stopping to reverse |
 | ← → / A D | Steer |
 | Space | Back on track: when off the track or facing backwards, the car is put on the centre line, facing the race direction, and waits 3 seconds (other cars drive through it meanwhile) |
 | + / - | Zoom in / out, 7 levels (7 = closest, the default) |
