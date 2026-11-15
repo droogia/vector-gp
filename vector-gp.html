@@ -24,17 +24,17 @@ button:hover{color:var(--g);border-color:var(--g)}
 button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-shadow:0 0 6px var(--g) inset}
 #go{font-size:18px;padding:6px 22px;color:var(--g);border-color:var(--g);text-shadow:0 0 8px var(--g);box-shadow:0 0 10px var(--g)}
 #selname{color:var(--g);flex:1 1 100%;text-shadow:0 0 6px var(--g)}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:16px}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:16px}
 .sec{grid-column:1/-1;margin-top:14px;padding:6px 0 2px;border-bottom:1px solid var(--gdd);letter-spacing:.2em;text-shadow:0 0 6px var(--g)}
 .card.canc{border-style:dashed}
 .card .r b{font-weight:normal;color:var(--g)}
 .card{border:1px solid var(--gdd);padding:8px;cursor:pointer;transition:border-color .1s}
 .card:hover{border-color:var(--gd)}
 .card.sel{border-color:var(--g);box-shadow:0 0 12px rgba(57,255,20,.45) inset,0 0 8px rgba(57,255,20,.5)}
-.card canvas{width:100%;height:120px;display:block;margin:4px 0}
-.card .n{font-size:14px}
-.card .r{font-size:11px;color:var(--gd)}
-.foot{margin-top:18px;font-size:12px;color:var(--gd)}
+.card canvas{width:100%;height:140px;display:block;margin:4px 0}
+.card .n{font-size:16px}
+.card .r{font-size:14px;color:var(--gd)}
+.foot{margin-top:18px;font-size:15px;line-height:1.5;color:var(--gd)}
 #panel{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:15;background:rgba(0,0,0,.88);border:1px solid var(--g);box-shadow:0 0 18px rgba(57,255,20,.5);padding:22px 30px;min-width:360px;text-align:center}
 #panel h2{font-weight:normal;letter-spacing:.3em;margin:0 0 6px;text-shadow:0 0 10px var(--g)}
 #panel table{border-collapse:collapse;margin:16px auto;width:100%}
@@ -54,15 +54,17 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 #detail .dopts{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
 #detail .nav{display:flex;gap:10px;align-items:center;margin-top:14px}
 #detail .nav .sp{flex:1;text-align:center;color:var(--gd)}
-#panel .sub{color:var(--gd);font-size:13px;margin:6px 0}
+#panel .sub{color:var(--gd);font-size:15px;margin:6px 0}
 #panel h3{font-weight:normal;letter-spacing:.2em;margin:12px 0 4px;color:var(--g);text-align:left}
 #panel .cols{display:flex;gap:28px;text-align:left}
 #panel .cols table{margin:4px 0}
 #panel td.k{color:var(--g);white-space:nowrap}
 #panel table.set td{padding:6px 8px}
 #panel table.set tr.cur td:first-child{color:var(--g);text-shadow:0 0 6px var(--g)}
-#panel table.set tr.cur td:first-child::before{content:'▶ '}
-#panel table.set tr.note td{padding:0 8px 6px;font-size:11px;color:var(--gdd)}
+#panel table.set{table-layout:fixed;width:760px}
+#panel table.set .mk{display:inline-block;width:1.4em;visibility:hidden}
+#panel table.set tr.cur .mk{visibility:visible}
+#panel table.set tr.note td{padding:0 8px 10px;font-size:15px;color:var(--gd)}
 #panel button{padding:2px 10px}
 #panel{max-width:96vw;max-height:94vh;overflow:auto}
 #panel .cols td,#panel .cols th{white-space:nowrap;padding:3px 10px}
@@ -106,7 +108,7 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 <div class="vig"></div><div class="scan"></div>
 <script>
 'use strict';
-/* VECTOR GP v2.1 — single-file browser racing game */
+/* VECTOR GP v2.2 — single-file browser racing game */
 /* Circuit geometry derived from bacinger/f1-circuits (https://github.com/bacinger/f1-circuits)
    Copyright (c) 2019-2025 Tomislav Bacinger, MIT License. Smoothed and widened for gameplay. */
 const TRACKS=[
@@ -391,7 +393,7 @@ function standings(cars) {
 const G = '#39ff14', GD = '#1c8a0c', GDD = '#0d4a06';
 const FONT = '"Share Tech Mono", ui-monospace, Consolas, monospace';
 const cv = document.getElementById('game'), ctx = cv.getContext('2d');
-let W = 0, H = 0, DPR = 1;
+let W = 0, H = 0, DPR = 1, U = 1;   // U: extra text scale on large displays
 const opt = Object.assign({ sel: 0 }, decodeSettings(location.hash, TRACKS));
 opt.sel = Math.max(0, TRACKS.findIndex(t => t.id === opt.track));
 let race = null, mode = 'menu', paused = false, overlay = null, fullView = false, muted = false;
@@ -499,24 +501,58 @@ const CAR = (() => {
 
 // ---------- menu ----------
 const menuEl = document.getElementById('menu'), gridEl = document.getElementById('grid'), panel = document.getElementById('panel');
+// Where to draw the start/direction arrow beside the start lane: just after the start line,
+// on the side (and at the spot) with the most room from every other part of the circuit.
+// off = distance from the lane centre, in world units.
+function insideTrack(T, px, py) {     // even-odd test against the centre line polygon
+  let inside = false;
+  for (let i = 0, j = T.N - 1; i < T.N; j = i++)
+    if ((T.Y[i] > py) !== (T.Y[j] > py) && px < (T.X[j] - T.X[i]) * (py - T.Y[i]) / (T.Y[j] - T.Y[i]) + T.X[i]) inside = !inside;
+  return inside;
+}
+function startArrow(T, off) {
+  const key = Math.round(off);
+  T.arrows = T.arrows || {};
+  if (T.arrows[key]) return T.arrows[key];
+  let best = null;
+  const span = Math.min(T.N >> 2, 40);
+  for (let i = 0; i <= span; i += 2) for (const sd of [1, -1]) {
+    const px = T.X[i] + T.NX[i] * off * sd, py = T.Y[i] + T.NY[i] * off * sd;
+    let dmin = Infinity;
+    for (let j = 0; j < T.N; j += 2) {
+      let g = Math.abs(i - j); g = Math.min(g, T.N - g); if (g < 25) continue;
+      const d = Math.hypot(px - T.X[j], py - T.Y[j]); if (d < dmin) dmin = d;
+    }
+    // enough room is enough; prefer the outside of the circuit (unambiguous), then near the line
+    const score = Math.min(dmin, off * 4) + (insideTrack(T, px, py) ? 0 : off * 1.5) - i * STEP * 0.02;
+    if (!best || score > best.score) best = { score, i, side: sd, clear: dmin, x: px, y: py, a: Math.atan2(T.TY[i], T.TX[i]) };
+  }
+  return (T.arrows[key] = best);
+}
+function drawArrow(x, cx, cy, a, L) {
+  x.beginPath(); x.moveTo(cx + Math.cos(a) * L, cy + Math.sin(a) * L);
+  x.lineTo(cx + Math.cos(a + 2.5) * L, cy + Math.sin(a + 2.5) * L);
+  x.lineTo(cx - Math.cos(a) * L * 0.35, cy - Math.sin(a) * L * 0.35);
+  x.lineTo(cx + Math.cos(a - 2.5) * L, cy + Math.sin(a - 2.5) * L);
+  x.closePath(); x.fill();
+}
 function drawPreview(c, t, big) {
   const T = buildTrack(t), x = c.getContext('2d');
   const w = c.width = c.clientWidth * DPR, h = c.height = c.clientHeight * DPR;
-  const pad = 10 * DPR, s = Math.min((w - 2 * pad) / (T.maxX - T.minX), (h - 2 * pad) / (T.maxY - T.minY));
+  const pad = 12 * DPR, s = Math.min((w - 2 * pad) / (T.maxX - T.minX), (h - 2 * pad) / (T.maxY - T.minY));
   const ox = (w - (T.maxX - T.minX) * s) / 2 - T.minX * s, oy = (h - (T.maxY - T.minY) * s) / 2 - T.minY * s;
   x.clearRect(0, 0, w, h);
   x.strokeStyle = big ? G : GD; x.lineWidth = 1.6 * DPR; x.shadowColor = G; x.shadowBlur = big ? 6 * DPR : 0;
   x.beginPath();
   for (let i = 0; i <= T.N; i++) { const j = i % T.N; x[i ? 'lineTo' : 'moveTo'](T.X[j] * s + ox, T.Y[j] * s + oy); }
   x.stroke();
-  // start marker + direction
-  const sx = T.X[0] * s + ox, sy = T.Y[0] * s + oy;
-  x.fillStyle = G; x.fillRect(sx - 2.5 * DPR, sy - 2.5 * DPR, 5 * DPR, 5 * DPR);
-  const a = Math.atan2(T.TY[0], T.TX[0]), L = 9 * DPR;
-  x.beginPath(); x.moveTo(sx + Math.cos(a) * L * 1.6, sy + Math.sin(a) * L * 1.6);
-  x.lineTo(sx + Math.cos(a + 2.6) * L * 0.6 + Math.cos(a) * L, sy + Math.sin(a + 2.6) * L * 0.6 + Math.sin(a) * L);
-  x.lineTo(sx + Math.cos(a - 2.6) * L * 0.6 + Math.cos(a) * L, sy + Math.sin(a - 2.6) * L * 0.6 + Math.sin(a) * L);
-  x.closePath(); x.fill();
+  // start line: a short tick across the lane
+  const sx = T.X[0] * s + ox, sy = T.Y[0] * s + oy, tk = 5 * DPR;
+  x.strokeStyle = G; x.lineWidth = 2.2 * DPR;
+  x.beginPath(); x.moveTo(sx + T.NX[0] * tk, sy + T.NY[0] * tk); x.lineTo(sx - T.NX[0] * tk, sy - T.NY[0] * tk); x.stroke();
+  // direction arrow beside the start lane
+  const A = startArrow(T, 9 * DPR / s);
+  x.fillStyle = G; drawArrow(x, A.x * s + ox, A.y * s + oy, A.a, 6.5 * DPR);
 }
 function cardLabel(t) {
   return t.g === '2026' ? `R${String(t.r).padStart(2, '0')} · ${t.id} · ${t.date.toUpperCase()}` : `${t.id} · ${t.date.toUpperCase()}`;
@@ -603,10 +639,8 @@ function drawDetail(ts) {
   // start/finish line and direction arrow
   x.shadowBlur = 8 * DPR; x.strokeStyle = G; x.lineWidth = 3 * DPR / s;
   x.beginPath(); x.moveTo(T.X[0] + T.NX[0] * HALF * 1.6, T.Y[0] + T.NY[0] * HALF * 1.6); x.lineTo(T.X[0] - T.NX[0] * HALF * 1.6, T.Y[0] - T.NY[0] * HALF * 1.6); x.stroke();
-  const j = Math.min(T.N - 1, Math.round(140 / STEP)), A = 14 * DPR / s, ax = T.X[j] + T.NX[j] * (HALF + 3 * A), ay = T.Y[j] + T.NY[j] * (HALF + 3 * A);
-  const a = Math.atan2(T.TY[j], T.TX[j]);
-  x.fillStyle = G; x.beginPath(); x.moveTo(ax + Math.cos(a) * A, ay + Math.sin(a) * A);
-  x.lineTo(ax + Math.cos(a + 2.5) * A, ay + Math.sin(a + 2.5) * A); x.lineTo(ax + Math.cos(a - 2.5) * A, ay + Math.sin(a - 2.5) * A); x.closePath(); x.fill();
+  const AR = startArrow(T, HALF + 13 * DPR / s);
+  x.shadowBlur = 8 * DPR; x.fillStyle = G; drawArrow(x, AR.x, AR.y, AR.a, 10 * DPR / s);
   // a marker driving a lap every 9 s, with a short fading trail
   const u = (ts / 9000) % 1;
   for (let k = 12; k >= 0; k--) {
@@ -652,9 +686,9 @@ const SET_ROWS = [
 function settingsHTML() {
   const rows = SET_ROWS.map((r, i) => {
     let bar = ''; for (let k = 1; k <= r.n; k++) bar += `<span class="pip${k <= opt[r.k] ? ' on' : ''}"></span>`;
-    return `<tr class="${i === settingsRow ? 'cur' : ''}"><td>${r.label}</td><td><button data-act="dec" data-k="${r.k}">-</button></td><td class="pips">${bar}</td><td><button data-act="inc" data-k="${r.k}">+</button></td><td>${opt[r.k]}</td></tr><tr class="note"><td></td><td colspan="4">${r.note}</td></tr>`;
+    return `<tr class="${i === settingsRow ? 'cur' : ''}"><td><span class="mk">▶</span>${r.label}</td><td><button data-act="dec" data-k="${r.k}">-</button></td><td class="pips">${bar}</td><td><button data-act="inc" data-k="${r.k}">+</button></td><td>${opt[r.k]}</td></tr><tr class="note"><td></td><td colspan="4">${r.note}</td></tr>`;
   }).join('');
-  return `<h2>SETTINGS</h2><div class="sub">STEERING AND BRAKES AFFECT ONLY YOUR CAR · AI CARS FOLLOW THE AI LEVEL</div><table class="set">${rows}</table>
+  return `<h2>SETTINGS</h2><div class="sub">STEERING AND BRAKES AFFECT ONLY YOUR CAR · AI CARS FOLLOW THE AI LEVEL</div><table class="set"><colgroup><col style="width:11em"><col style="width:3.5em"><col><col style="width:3.5em"><col style="width:2.5em"></colgroup>${rows}</table>
   <div class="sub">URL CODE #${encodeSettings(opt)}</div><div class="keys">[↑↓] SELECT &nbsp; [←→] CHANGE &nbsp; [O] [ESC] CLOSE</div>`;
 }
 function openSettings() { settingsRow = Math.min(settingsRow, SET_ROWS.length - 1); openOverlay('settings', settingsHTML()); }
@@ -808,13 +842,14 @@ document.querySelectorAll('#touch [data-t]').forEach(b => {
 function resize() {
   DPR = Math.min(2, window.devicePixelRatio || 1);
   W = cv.width = Math.floor(innerWidth * DPR); H = cv.height = Math.floor(innerHeight * DPR);
+  U = clamp(Math.min(innerWidth, innerHeight) / 900, 1, 1.8);
   if (mode === 'menu') { cards().forEach(d => d.drawn = 0); refreshMenu(); }
 }
 addEventListener('resize', resize);
 
 function glow(b) { ctx.shadowColor = G; ctx.shadowBlur = b * DPR; }
 function text(s, x, y, size, col, align) {
-  ctx.font = `${size * DPR}px ${FONT}`; ctx.fillStyle = col || G; ctx.textAlign = align || 'left'; ctx.fillText(s, x, y);
+  ctx.font = `${size * DPR * U}px ${FONT}`; ctx.fillStyle = col || G; ctx.textAlign = align || 'left'; ctx.fillText(s, x, y);
 }
 
 function drawWorld(z) {
@@ -836,26 +871,28 @@ function drawWorld(z) {
   }
 }
 function drawLabels() {
+  const D = DPR * U;
   const m = ctx.getTransform();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   glow(4);
   for (const c of race.cars) {
     const p = m.transformPoint(new DOMPoint(c.x, c.y));
     const s = c.isP ? 'YOU' : String(c.num);
-    text(s, p.x, p.y - 22 * DPR, 12, c.isP ? G : GD, 'center');
+    text(s, p.x, p.y - 24 * D, 14, c.isP ? G : GD, 'center');
   }
 }
 function drawMinimap() {
-  const T = race.T, S = Math.min(W, H) * 0.24, pad = 14 * DPR, x0 = W - S - pad, y0 = pad;
+  const D = DPR * U;
+  const T = race.T, S = Math.min(W, H) * 0.24, pad = 14 * D, x0 = W - S - pad, y0 = pad;
   ctx.save();
-  glow(0); ctx.strokeStyle = GDD; ctx.lineWidth = DPR; ctx.strokeRect(x0, y0, S, S);
-  const s = Math.min((S - 20 * DPR) / (T.maxX - T.minX), (S - 20 * DPR) / (T.maxY - T.minY));
+  glow(0); ctx.strokeStyle = GDD; ctx.lineWidth = D; ctx.strokeRect(x0, y0, S, S);
+  const s = Math.min((S - 20 * D) / (T.maxX - T.minX), (S - 20 * D) / (T.maxY - T.minY));
   const ox = x0 + (S - (T.maxX - T.minX) * s) / 2 - T.minX * s, oy = y0 + (S - (T.maxY - T.minY) * s) / 2 - T.minY * s;
   ctx.translate(ox, oy); ctx.scale(s, s);
-  glow(4); ctx.strokeStyle = GD; ctx.lineWidth = 1.5 * DPR / s; ctx.stroke(trackPaths(T).C);
+  glow(4); ctx.strokeStyle = GD; ctx.lineWidth = 1.5 * D / s; ctx.stroke(trackPaths(T).C);
   ctx.fillStyle = G;
   for (const c of race.cars) {
-    const r = (c.isP ? 4 : 2.6) * DPR / s;
+    const r = (c.isP ? 4 : 2.6) * D / s;
     if (c.isP && (performance.now() / 250 | 0) % 2) continue;
     ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, 7); ctx.fill();
   }
@@ -863,45 +900,47 @@ function drawMinimap() {
   // standings under the minimap
   const st = standings(race.cars);
   glow(3);
-  st.forEach((c, i) => text(`P${i + 1}  ${c.isP ? 'YOU' : 'CAR ' + c.num}${c.fin ? '  FIN' : ''}`, x0, y0 + S + (22 + i * 18) * DPR, 14, c.isP ? G : GD));
+  st.forEach((c, i) => text(`P${i + 1}  ${c.isP ? 'YOU' : 'CAR ' + c.num}${c.fin ? '  FIN' : ''}`, x0, y0 + S + (24 + i * 21) * D, 16, c.isP ? G : GD));
 }
 function drawHUD() {
-  const P = race.player, st = standings(race.cars), pos = st.indexOf(P) + 1, pad = 16 * DPR;
+  const D = DPR * U;
+  const P = race.player, st = standings(race.cars), pos = st.indexOf(P) + 1, pad = 16 * D;
   glow(6);
   const lapShown = clamp(Math.max(1, P.lap), 1, race.laps);
-  text(race.track.gp.toUpperCase() + ' · ' + race.track.c.toUpperCase() + ' · ' + (race.track.g === '2026' ? '2026' : race.track.date), pad, pad + 14 * DPR, 14, GD);
-  text(`LAP ${lapShown}/${race.laps}`, pad, pad + 44 * DPR, 26);
-  text(`POS ${pos}/4`, pad, pad + 74 * DPR, 26);
+  text(race.track.gp.toUpperCase() + ' · ' + race.track.c.toUpperCase() + ' · ' + (race.track.g === '2026' ? '2026' : race.track.date), pad, pad + 16 * D, 16, GD);
+  text(`LAP ${lapShown}/${race.laps}`, pad, pad + 44 * D, 26);
+  text(`POS ${pos}/4`, pad, pad + 74 * D, 26);
   const cur = mode === 'race' || mode === 'done' ? (P.fin ? P.finT : race.t) : 0;
-  text('TIME ' + fmt(cur), pad, pad + 100 * DPR, 16);
-  text('LAST ' + fmt(P.last), pad, pad + 120 * DPR, 16, P.newLap ? G : GD);
-  text('BEST ' + fmt(P.best), pad, pad + 140 * DPR, 16, GD);
+  text('TIME ' + fmt(cur), pad, pad + 100 * D, 16);
+  text('LAST ' + fmt(P.last), pad, pad + 120 * D, 16, P.newLap ? G : GD);
+  text('BEST ' + fmt(P.best), pad, pad + 140 * D, 16, GD);
   // speed
   const kmh = Math.round(Math.abs(P.f) * 0.75);
-  text(String(kmh).padStart(3, ' '), pad, H - pad - 26 * DPR, 48);
-  text('KM/H', pad + 90 * DPR, H - pad - 26 * DPR, 14, GD);
-  const bw = 220 * DPR, frac = clamp(Math.abs(P.f) / VMAX, 0, 1);
-  ctx.strokeStyle = GD; ctx.lineWidth = DPR; ctx.strokeRect(pad, H - pad - 14 * DPR, bw, 10 * DPR);
-  for (let i = 0; i < 20; i++) if (i / 20 < frac) { ctx.fillStyle = G; ctx.fillRect(pad + 2 * DPR + i * (bw - 4 * DPR) / 20, H - pad - 12 * DPR, (bw - 4 * DPR) / 20 - 2 * DPR, 6 * DPR); }
+  text(String(kmh).padStart(3, ' '), pad, H - pad - 26 * D, 48);
+  text('KM/H', pad + 92 * D, H - pad - 26 * D, 16, GD);
+  const bw = 220 * D, frac = clamp(Math.abs(P.f) / VMAX, 0, 1);
+  ctx.strokeStyle = GD; ctx.lineWidth = D; ctx.strokeRect(pad, H - pad - 14 * D, bw, 10 * D);
+  for (let i = 0; i < 20; i++) if (i / 20 < frac) { ctx.fillStyle = G; ctx.fillRect(pad + 2 * D + i * (bw - 4 * D) / 20, H - pad - 12 * D, (bw - 4 * D) / 20 - 2 * D, 6 * D); }
   const blink = (performance.now() / 200 | 0) % 2 ? G : GD;
   if (P.wait > 0) { glow(14); text('BACK ON TRACK IN ' + Math.ceil(P.wait), W / 2, H * 0.3, 30, G, 'center'); glow(6); }
-  else if (mode === 'race' && !P.fin && canRecover(P, race.T)) text((P.off ? 'OFF TRACK' : 'WRONG WAY') + ' · SPACE TO RECOVER', W / 2, H - pad - 30 * DPR, 22, blink, 'center');
+  else if (mode === 'race' && !P.fin && canRecover(P, race.T)) text((P.off ? 'OFF TRACK' : 'WRONG WAY') + ' · SPACE TO RECOVER', W / 2, H - pad - 30 * D, 22, blink, 'center');
   if (P.newLap && P.lap === race.laps && !P.fin) text('FINAL LAP', W / 2, H * 0.28, 30, G, 'center');
   if (msgT > 0) text(msg, W / 2, H * 0.18, 18, G, 'center');
-  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · H HELP · O SETTINGS · P PAUSE · ESC MENU', W / 2, H - 8 * DPR, 11, GDD, 'center');
+  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · H HELP · O SETTINGS · P PAUSE · ESC MENU', W / 2, H - 9 * D, 14, GD, 'center');
 }
 function drawLights() {
+  const D = DPR * U;
   const n = mode === 'lights' ? Math.min(5, Math.floor(lightsT / 0.8)) : 0;
   const show = mode === 'lights' || (mode === 'race' && race.t < 1.2);
   if (!show) return;
-  const r = 16 * DPR, gap = 46 * DPR, x0 = W / 2 - gap * 2, y = H * 0.16;
-  ctx.lineWidth = 2 * DPR;
+  const r = 16 * D, gap = 46 * D, x0 = W / 2 - gap * 2, y = H * 0.16;
+  ctx.lineWidth = 2 * D;
   for (let i = 0; i < 5; i++) {
     ctx.beginPath(); ctx.arc(x0 + i * gap, y, r, 0, 7);
     glow(i < n ? 14 : 0); ctx.strokeStyle = i < n ? G : GD; ctx.stroke();
     if (i < n) { ctx.fillStyle = G; ctx.fill(); }
   }
-  if (mode === 'race') { glow(16); text('GO!', W / 2, y + 70 * DPR, 44, G, 'center'); }
+  if (mode === 'race') { glow(16); text('GO!', W / 2, y + 70 * D, 44, G, 'center'); }
 }
 
 function render(dt) {
