@@ -42,6 +42,32 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 #panel th{font-weight:normal;border-bottom:1px solid var(--gdd)}
 #panel tr.me td{color:var(--g);text-shadow:0 0 6px var(--g)}
 #panel .keys{color:var(--g);margin-top:8px}
+#detail{display:none;position:fixed;inset:0;z-index:14;background:rgba(0,0,0,.78);align-items:center;justify-content:center}
+#detail .box{background:#000;border:1px solid var(--g);box-shadow:0 0 18px rgba(57,255,20,.5);width:min(1100px,94vw);height:min(680px,90vh);display:flex;flex-direction:column;padding:16px 20px}
+#detail .main{flex:1;display:flex;gap:18px;min-height:0}
+#dmap{flex:1.5;min-width:0;height:100%;border:1px solid var(--gdd)}
+#dinfo{flex:1;overflow:auto}
+#dinfo h2{font-weight:normal;letter-spacing:.15em;margin:0 0 10px;text-shadow:0 0 8px var(--g)}
+#dinfo td{padding:4px 10px 4px 0;vertical-align:top}
+#dinfo td:first-child{color:var(--gd);white-space:nowrap}
+#dinfo b{font-weight:normal;color:var(--g);text-shadow:0 0 6px var(--g)}
+#detail .dopts{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
+#detail .nav{display:flex;gap:10px;align-items:center;margin-top:14px}
+#detail .nav .sp{flex:1;text-align:center;color:var(--gd)}
+#panel .sub{color:var(--gd);font-size:13px;margin:6px 0}
+#panel h3{font-weight:normal;letter-spacing:.2em;margin:12px 0 4px;color:var(--g);text-align:left}
+#panel .cols{display:flex;gap:28px;text-align:left}
+#panel .cols table{margin:4px 0}
+#panel td.k{color:var(--g);white-space:nowrap}
+#panel table.set td{padding:6px 8px}
+#panel table.set tr.cur td:first-child{color:var(--g);text-shadow:0 0 6px var(--g)}
+#panel table.set tr.cur td:first-child::before{content:'▶ '}
+#panel table.set tr.note td{padding:0 8px 6px;font-size:11px;color:var(--gdd)}
+#panel button{padding:2px 10px}
+#panel{max-width:96vw;max-height:94vh;overflow:auto}
+#panel .cols td,#panel .cols th{white-space:nowrap;padding:3px 10px}
+.pip{display:inline-block;width:18px;height:12px;border:1px solid var(--gd);margin-right:4px}
+.pip.on{background:var(--g);border-color:var(--g);box-shadow:0 0 6px var(--g)}
 #touch{display:none;position:fixed;inset:auto 0 0 0;height:0;z-index:12}
 #touch div{position:fixed;bottom:22px;width:84px;height:84px;border:1px solid var(--gd);color:var(--gd);display:flex;align-items:center;justify-content:center;font-size:20px;touch-action:none;background:rgba(0,0,0,.3)}
 </style>
@@ -56,21 +82,31 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
     <div class="opt"><span>LAPS</span><button data-o="laps" data-v="1">1</button><button data-o="laps" data-v="3">3</button><button data-o="laps" data-v="5">5</button><button data-o="laps" data-v="10">10</button></div>
     <div class="opt"><span>AI</span><button data-o="diff" data-v="EASY">EASY</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="HARD">HARD</button></div>
     <div class="opt"><span>CAMERA</span><button data-o="cam" data-v="FIXED">FIXED</button><button data-o="cam" data-v="CHASE">CHASE</button></div>
+    <button id="setbtn">SETTINGS</button>
     <button id="go">START ▶</button>
   </div>
   <div id="grid"></div>
-  <div class="foot">ARROWS SELECT · ENTER START · DOUBLE-CLICK A CIRCUIT TO RACE<br>
+  <div class="foot">ARROWS SELECT · ENTER OR DOUBLE-CLICK OPENS THE CIRCUIT · O SETTINGS · YOUR SETTINGS ARE KEPT IN THE PAGE ADDRESS (#CODE): BOOKMARK IT<br>
   Bahrain and Saudi Arabia were cancelled from the 2026 calendar but stay playable. Circuit outlines come from surveyed geometry (bacinger/f1-circuits, MIT licence), smoothed and widened for the game, with real lengths, start lines and racing directions.</div>
 </div>
 <div id="panel"></div>
+<div id="detail"><div class="box">
+  <div class="main"><canvas id="dmap"></canvas><div id="dinfo"></div></div>
+  <div class="dopts">
+    <div class="opt"><span>LAPS</span><button data-o="laps" data-v="1">1</button><button data-o="laps" data-v="3">3</button><button data-o="laps" data-v="5">5</button><button data-o="laps" data-v="10">10</button></div>
+    <div class="opt"><span>AI</span><button data-o="diff" data-v="EASY">EASY</button><button data-o="diff" data-v="NORMAL">NORMAL</button><button data-o="diff" data-v="HARD">HARD</button></div>
+    <div class="opt"><span>CAMERA</span><button data-o="cam" data-v="FIXED">FIXED</button><button data-o="cam" data-v="CHASE">CHASE</button></div>
+  </div>
+  <div class="nav"><button id="dprev">◀ PREV</button><button id="dback">BACK [ESC]</button><span class="sp" id="dpos"></span><button id="dgo">START ▶ [ENTER]</button><button id="dnext">NEXT ▶</button></div>
+</div></div>
 <div id="touch">
   <div data-t="l" style="left:18px">◀</div><div data-t="r" style="left:116px">▶</div>
-  <div data-t="b" style="right:116px">BRK</div><div data-t="g" style="right:18px">GAS</div>
+  <div data-t="b" style="right:116px">BRK</div><div data-t="x" style="right:18px;bottom:122px">↺</div><div data-t="g" style="right:18px">GAS</div>
 </div>
 <div class="vig"></div><div class="scan"></div>
 <script>
 'use strict';
-/* VECTOR GP v2.0 — single-file browser racing game */
+/* VECTOR GP v2.1 — single-file browser racing game */
 /* Circuit geometry derived from bacinger/f1-circuits (https://github.com/bacinger/f1-circuits)
    Copyright (c) 2019-2025 Tomislav Bacinger, MIT License. Smoothed and widened for gameplay. */
 const TRACKS=[
@@ -123,6 +159,11 @@ const HALF = 44;               // half track width
 const WALL = HALF + 70;        // barrier distance from centerline
 const VMAX = 440, ACC = 330, BRK = 700, TR = 2.9;
 const DIFF = { EASY: [.80, .83, .86], NORMAL: [.88, .91, .94], HARD: [.95, .98, 1.0] };
+// player driving aids, levels 1..5 (3 = neutral)
+const STEER_RATE = [0.75, 0.88, 1, 1.12, 1.25];   // how hard the car can turn
+const STEER_RAMP = [3.5, 5, 7, 9.5, 12];           // how fast the steering reaches full lock (per s)
+const BRAKE_LV = [0.70, 0.85, 1, 1.15, 1.30];      // braking force
+const RECOVER_WAIT = 3;                            // seconds frozen after Space puts the car back
 
 function angDiff(a, b) { let d = a - b; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; }
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -222,13 +263,14 @@ function stepCar(c, T, ctl, dt) {
   let f = c.vx * ca + c.vy * sa, l = -c.vx * sa + c.vy * ca;
   const off = c.off;
   if (ctl.thr > 0) f += ACC * ctl.thr * Math.max(0, 1 - (f / VMAX) ** 2) * dt;
-  if (ctl.brk > 0) { if (f > 2) f -= BRK * ctl.brk * dt; else f = Math.max(-90, f - 160 * ctl.brk * dt); }
+  const sl = (c.steerLv || 3) - 1, bl = (c.brakeLv || 3) - 1;
+  if (ctl.brk > 0) { if (f > 2) f -= BRK * BRAKE_LV[bl] * ctl.brk * dt; else f = Math.max(-90, f - 160 * ctl.brk * dt); }
   f -= f * (off ? 1.8 : 0.04) * dt;
   if (!ctl.thr && !ctl.brk) f -= f * 0.3 * dt;
   l *= Math.exp(-(off ? 3 : 9) * dt);
   c.vx = f * ca - l * sa; c.vy = f * sa + l * ca;
-  const av = Math.abs(f), w = TR * Math.max(0.45, Math.min(1, av / 60)) / (1 + av / 260) * (off ? 0.8 : 1);
-  c.steer += clamp(ctl.steer - c.steer, -7 * dt, 7 * dt);
+  const av = Math.abs(f), w = TR * STEER_RATE[sl] * Math.max(0.45, Math.min(1, av / 60)) / (1 + av / 260) * (off ? 0.8 : 1);
+  c.steer += clamp(ctl.steer - c.steer, -STEER_RAMP[sl] * dt, STEER_RAMP[sl] * dt);
   c.a += c.steer * w * (f > 0.3 ? 1 : f < -0.3 ? -1 : (ctl.thr ? 1 : ctl.brk ? -1 : 0)) * dt;
   c.x += c.vx * dt; c.y += c.vy * dt;
   c.f = f; c.slip = Math.abs(l);
@@ -270,6 +312,7 @@ function aiControl(c, T, cars) {
 function collide(cars, N) {
   for (let i = 0; i < cars.length; i++) for (let k = i + 1; k < cars.length; k++) {
     const A = cars[i], B = cars[k];
+    if (A.wait > 0 || B.wait > 0) continue;          // a car being put back on track is a ghost
     let g = Math.abs(A.idx - B.idx); g = Math.min(g, N - g); if (g > 30) continue;   // e.g. Suzuka crossover bridge
     if (Math.abs(A.x - B.x) > 40 || Math.abs(A.y - B.y) > 40) continue;
     for (const ea of [-6, 6]) for (const eb of [-6, 6]) {
@@ -290,6 +333,7 @@ function simTick(race, input, dt) {
   const { T, cars } = race;
   for (const c of cars) {
     const prevLap = c.lap;
+    if (c.wait > 0) { c.wait = Math.max(0, c.wait - dt); continue; }
     const ctl = c.auto ? aiControl(c, T, cars) : input;
     stepCar(c, T, ctl, dt);
     if (c.lap > prevLap) {
@@ -303,6 +347,42 @@ function simTick(race, input, dt) {
   race.t += dt;
 }
 
+// Space: put a car that is off the track (or facing the wrong way) back on the centre line
+function canRecover(c, T) {
+  if (c.fin || c.wait > 0) return false;
+  const wrong = Math.abs(angDiff(c.a, Math.atan2(T.TY[c.idx], T.TX[c.idx]))) > Math.PI / 2;
+  return c.off || wrong;
+}
+function recover(c, T) {
+  if (!canRecover(c, T)) return false;
+  const i = c.idx;
+  c.x = T.X[i]; c.y = T.Y[i]; c.a = Math.atan2(T.TY[i], T.TX[i]);
+  c.vx = c.vy = c.f = c.steer = 0; c.d = 0; c.off = false; c.hit = 0;
+  c.wait = RECOVER_WAIT;
+  return true;
+}
+
+// settings <-> readable URL code, e.g. AUS-L3-N-F-S3-B3-Z7
+const SETTINGS_DEFAULT = { track: 'AUS', laps: 3, diff: 'NORMAL', cam: 'FIXED', steer: 3, brake: 3, zoom: 7 };
+function encodeSettings(o) {
+  return [o.track, 'L' + o.laps, o.diff[0], o.cam[0], 'S' + o.steer, 'B' + o.brake, 'Z' + o.zoom].join('-');
+}
+function decodeSettings(code, tracks) {
+  const o = Object.assign({}, SETTINGS_DEFAULT);
+  const parts = String(code || '').replace(/^#/, '').toUpperCase().split('-').filter(Boolean);
+  for (const p of parts) {
+    let m;
+    if (tracks.some(t => t.id === p)) o.track = p;
+    else if ((m = /^L(1|3|5|10)$/.exec(p))) o.laps = +m[1];
+    else if (p === 'E' || p === 'N' || p === 'H') o.diff = { E: 'EASY', N: 'NORMAL', H: 'HARD' }[p];
+    else if (p === 'F' || p === 'C') o.cam = p === 'F' ? 'FIXED' : 'CHASE';
+    else if ((m = /^S([1-5])$/.exec(p))) o.steer = +m[1];
+    else if ((m = /^B([1-5])$/.exec(p))) o.brake = +m[1];
+    else if ((m = /^Z([1-7])$/.exec(p))) o.zoom = +m[1];
+  }
+  return o;
+}
+
 function standings(cars) {
   return cars.slice().sort((a, b) => (a.fin && b.fin) ? a.finT - b.finT : a.fin ? -1 : b.fin ? 1 : b.prog - a.prog);
 }
@@ -312,16 +392,28 @@ const G = '#39ff14', GD = '#1c8a0c', GDD = '#0d4a06';
 const FONT = '"Share Tech Mono", ui-monospace, Consolas, monospace';
 const cv = document.getElementById('game'), ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1;
-const opt = { sel: 0, track: 'AUS', laps: 3, diff: 'NORMAL', cam: 'FIXED' };
-let race = null, mode = 'menu', paused = false, fullView = false, muted = false;
-let camX = 0, camY = 0, lightsT = 0, goAt = 0, lastTs = 0, acc = 0, msg = '', msgT = 0;
+const opt = Object.assign({ sel: 0 }, decodeSettings(location.hash, TRACKS));
+opt.sel = Math.max(0, TRACKS.findIndex(t => t.id === opt.track));
+let race = null, mode = 'menu', paused = false, overlay = null, fullView = false, muted = false;
+let camX = 0, camY = 0, lightsT = 0, goAt = 0, lastTs = 0, acc = 0, msg = '', msgT = 0, zoomCur = 7;
+let detailOpen = false, settingsRow = 0;
 const keys = {};
 const touch = { l: 0, r: 0, g: 0, b: 0 };
 
-function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { } }
-try { Object.assign(opt, JSON.parse(lsGet('vgp-opt') || '{}')); } catch (e) { }
-opt.sel = Math.max(0, TRACKS.findIndex(t => t.id === opt.track));
+// settings live only in the URL (#AUS-L3-N-F-S3-B3-Z7): no browser storage
+function writeHash() {
+  opt.track = TRACKS[opt.sel].id;
+  const code = encodeSettings(opt);
+  if (location.hash.replace(/^#/, '') === code) return;
+  try { history.replaceState(null, '', '#' + code); }
+  catch (e) { try { location.replace('#' + code); } catch (e2) { } }
+}
+addEventListener('hashchange', () => {
+  const o = decodeSettings(location.hash, TRACKS);
+  if (encodeSettings(o) === encodeSettings(opt)) return;
+  Object.assign(opt, o); opt.sel = Math.max(0, TRACKS.findIndex(t => t.id === opt.track));
+  if (mode === 'menu') { refreshMenu(); if (detailOpen) openDetail(); }
+});
 
 function fmt(t) {
   if (!isFinite(t) || t <= 0) return '-:--.---';
@@ -442,10 +534,9 @@ function buildMenu() {
     const d = document.createElement('div');
     d.className = 'card' + (t.canc ? ' canc' : '');
     d.dataset.i = i;
-    const rec = parseFloat(lsGet('vgp-best-' + t.id));
-    d.innerHTML = `<div class="r">${cardLabel(t)}${t.canc ? ' · <b>CANCELLED</b>' : ''}</div><canvas></canvas><div class="n">${t.gp.toUpperCase()}</div><div class="r">${t.c} · ${t.city} · ${t.km.toFixed(3)} KM</div><div class="r rec">REC ${rec ? fmt(rec) : '-:--.---'}</div>`;
+    d.innerHTML = `<div class="r">${cardLabel(t)}${t.canc ? ' · <b>CANCELLED</b>' : ''}</div><canvas></canvas><div class="n">${t.gp.toUpperCase()}</div><div class="r">${t.c} · ${t.city} · ${t.km.toFixed(3)} KM</div>`;
     d.onclick = () => { selectTrack(i); };
-    d.ondblclick = () => { selectTrack(i); startRace(); };
+    d.ondblclick = () => { selectTrack(i); openDetail(); };
     gridEl.appendChild(d);
   });
   refreshMenu();
@@ -458,31 +549,164 @@ function refreshMenu() {
   const t = TRACKS[opt.sel];
   document.getElementById('selname').textContent = `${cardLabel(t)} — ${t.gp.toUpperCase()} — ${t.c.toUpperCase()}${t.canc ? ' (CANCELLED IN 2026)' : ''}`;
 }
-function selectTrack(i) { opt.sel = (i + TRACKS.length) % TRACKS.length; opt.track = TRACKS[opt.sel].id; refreshMenu(); cards()[opt.sel].scrollIntoView({ block: 'nearest' }); }
-document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { opt[b.dataset.o] = b.dataset.o === 'laps' ? +b.dataset.v : b.dataset.v; refreshMenu(); });
+function selectTrack(i) {
+  opt.sel = (i + TRACKS.length) % TRACKS.length; writeHash(); refreshMenu();
+  cards()[opt.sel].scrollIntoView({ block: 'nearest' });
+  if (detailOpen) openDetail();
+}
+document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => {
+  opt[b.dataset.o] = b.dataset.o === 'laps' ? +b.dataset.v : b.dataset.v; writeHash(); refreshMenu(); if (detailOpen) detailInfo();
+});
 document.getElementById('go').onclick = () => startRace();
+document.getElementById('setbtn').onclick = () => openSettings();
+
+// ---------- circuit detail box ----------
+const detailEl = document.getElementById('detail'), detailCv = document.getElementById('dmap');
+function direction(t) {
+  if (t.id === 'JPN') return 'FIGURE OF EIGHT';
+  const T = buildTrack(t); let a = 0;
+  for (let i = 0; i < T.N; i++) { const j = (i + 1) % T.N; a += T.X[i] * T.Y[j] - T.X[j] * T.Y[i]; }
+  return a > 0 ? 'CLOCKWISE' : 'ANTICLOCKWISE';
+}
+function detailInfo() {
+  const t = TRACKS[opt.sel];
+  const row = (k, v) => `<tr><td>${k}</td><td>${v}</td></tr>`;
+  document.getElementById('dinfo').innerHTML = `<h2>${t.gp.toUpperCase()}</h2><table>` +
+    row('CIRCUIT', t.c) + row('LOCATION', t.city) +
+    (t.g === '2026' ? row('2026', `ROUND ${String(t.r).padStart(2, '0')} · ${t.date.toUpperCase()}${t.canc ? ' · <b>CANCELLED</b>' : ''}`) : row('F1 YEARS', t.date)) +
+    row('LENGTH', t.km.toFixed(3) + ' KM') + row('DIRECTION', direction(t)) +
+    row('RACE', `${opt.laps} LAP${opt.laps > 1 ? 'S' : ''} · ${(opt.laps * t.km).toFixed(1)} KM`) + '</table>';
+  document.getElementById('dpos').textContent = `${opt.sel + 1} / ${TRACKS.length}`;
+}
+function openDetail() {
+  detailOpen = true; detailEl.style.display = 'flex'; detailInfo(); refreshMenu();
+  detailEl.dataset.t = opt.sel; detailCv.dataset.w = 0;
+}
+function closeDetail() { detailOpen = false; detailEl.style.display = 'none'; }
+detailEl.addEventListener('click', e => { if (e.target === detailEl) closeDetail(); });
+document.getElementById('dprev').onclick = () => selectTrack(opt.sel - 1);
+document.getElementById('dnext').onclick = () => selectTrack(opt.sel + 1);
+document.getElementById('dback').onclick = () => closeDetail();
+document.getElementById('dgo').onclick = () => startRace();
+function drawDetail(ts) {
+  const T = buildTrack(TRACKS[opt.sel]), x = detailCv.getContext('2d');
+  const w = detailCv.clientWidth * DPR, h = detailCv.clientHeight * DPR;
+  if (detailCv.width !== w || detailCv.height !== h) { detailCv.width = w; detailCv.height = h; }
+  const pad = 24 * DPR, s = Math.min((w - 2 * pad) / (T.maxX - T.minX + 2 * HALF), (h - 2 * pad) / (T.maxY - T.minY + 2 * HALF));
+  const ox = w / 2 - (T.minX + T.maxX) / 2 * s, oy = h / 2 - (T.minY + T.maxY) / 2 * s;
+  x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, w, h);
+  x.setTransform(s, 0, 0, s, ox, oy);
+  const P = trackPaths(T);
+  x.lineJoin = 'round'; x.shadowColor = G;
+  if (HALF * s >= 2.2) { x.shadowBlur = 6 * DPR; x.strokeStyle = G; x.lineWidth = 1.4 * DPR / s; x.stroke(P.L); x.stroke(P.R); }
+  else { x.shadowBlur = 6 * DPR; x.strokeStyle = G; x.lineWidth = 2 * DPR / s; x.stroke(P.C); }
+  // start/finish line and direction arrow
+  x.shadowBlur = 8 * DPR; x.strokeStyle = G; x.lineWidth = 3 * DPR / s;
+  x.beginPath(); x.moveTo(T.X[0] + T.NX[0] * HALF * 1.6, T.Y[0] + T.NY[0] * HALF * 1.6); x.lineTo(T.X[0] - T.NX[0] * HALF * 1.6, T.Y[0] - T.NY[0] * HALF * 1.6); x.stroke();
+  const j = Math.min(T.N - 1, Math.round(140 / STEP)), A = 14 * DPR / s, ax = T.X[j] + T.NX[j] * (HALF + 3 * A), ay = T.Y[j] + T.NY[j] * (HALF + 3 * A);
+  const a = Math.atan2(T.TY[j], T.TX[j]);
+  x.fillStyle = G; x.beginPath(); x.moveTo(ax + Math.cos(a) * A, ay + Math.sin(a) * A);
+  x.lineTo(ax + Math.cos(a + 2.5) * A, ay + Math.sin(a + 2.5) * A); x.lineTo(ax + Math.cos(a - 2.5) * A, ay + Math.sin(a - 2.5) * A); x.closePath(); x.fill();
+  // a marker driving a lap every 9 s, with a short fading trail
+  const u = (ts / 9000) % 1;
+  for (let k = 12; k >= 0; k--) {
+    const i = Math.floor(((u - k * 0.004 + 1) % 1) * T.N);
+    x.globalAlpha = 1 - k / 13; x.beginPath(); x.arc(T.X[i], T.Y[i], (k ? 2.2 : 4) * DPR / s, 0, 7); x.fill();
+  }
+  x.globalAlpha = 1;
+}
 function gridCols() { const c = cards(); if (c.length < 2) return 1; const top = c[0].offsetTop; let n = 0; for (const e of c) { if (e.offsetTop !== top) break; n++; } return Math.max(1, n); }
 
 // ---------- race flow ----------
 function startRace() {
   audioInit(); if (AC && AC.state === 'suspended') AC.resume();
-  lsSet('vgp-opt', JSON.stringify(opt));
+  writeHash();
   const t = TRACKS[opt.sel], T = buildTrack(t); trackPaths(T);
   const sk = DIFF[opt.diff];
   const cars = [];
   for (let s = 0; s < 4; s++) cars.push(makeCar(T, s, s === 3, s === 3 ? 1 : sk[2 - s], s === 3 ? 1 : s + 2));
   race = { t: 0, T, cars, laps: opt.laps, track: t, player: cars[3], doneShown: false };
   camX = race.player.x; camY = race.player.y;
-  mode = 'lights'; lightsT = 0; goAt = 4 + 0.3 + Math.random() * 0.9; paused = false;
-  menuEl.style.display = 'none'; panel.style.display = 'none';
+  mode = 'lights'; lightsT = 0; goAt = 4 + 0.3 + Math.random() * 0.9;
+  closeOverlay(); closeDetail(); zoomCur = opt.zoom;
+  menuEl.style.display = 'none';
 }
 function toMenu() {
-  mode = 'menu'; paused = false; race = null;
-  panel.style.display = 'none'; menuEl.style.display = 'block';
+  mode = 'menu'; race = null; closeOverlay();
+  menuEl.style.display = 'block';
   if (engG) engG.gain.value = 0;
-  buildMenu();
+  buildMenu(); openDetail();
 }
 function showPanel(html) { panel.innerHTML = html; panel.style.display = 'block'; }
+function openOverlay(kind, html) {
+  overlay = kind; paused = kind !== 'results'; showPanel(html);
+  for (const k in keys) keys[k] = false;
+}
+function closeOverlay() { overlay = null; paused = false; panel.style.display = 'none'; }
+
+// ---------- settings panel (menu and in-race) ----------
+const SET_ROWS = [
+  { k: 'steer', label: 'STEERING', n: 5, note: 'how quickly and how sharply your car turns' },
+  { k: 'brake', label: 'BRAKES', n: 5, note: 'braking force of your car' },
+  { k: 'zoom', label: 'ZOOM', n: 7, note: '7 = closest view (also + / - while racing)' }];
+function settingsHTML() {
+  const rows = SET_ROWS.map((r, i) => {
+    let bar = ''; for (let k = 1; k <= r.n; k++) bar += `<span class="pip${k <= opt[r.k] ? ' on' : ''}"></span>`;
+    return `<tr class="${i === settingsRow ? 'cur' : ''}"><td>${r.label}</td><td><button data-act="dec" data-k="${r.k}">-</button></td><td class="pips">${bar}</td><td><button data-act="inc" data-k="${r.k}">+</button></td><td>${opt[r.k]}</td></tr><tr class="note"><td></td><td colspan="4">${r.note}</td></tr>`;
+  }).join('');
+  return `<h2>SETTINGS</h2><div class="sub">STEERING AND BRAKES AFFECT ONLY YOUR CAR · AI CARS FOLLOW THE AI LEVEL</div><table class="set">${rows}</table>
+  <div class="sub">URL CODE #${encodeSettings(opt)}</div><div class="keys">[↑↓] SELECT &nbsp; [←→] CHANGE &nbsp; [O] [ESC] CLOSE</div>`;
+}
+function openSettings() { settingsRow = Math.min(settingsRow, SET_ROWS.length - 1); openOverlay('settings', settingsHTML()); }
+function changeSetting(k, d) {
+  const r = SET_ROWS.find(r => r.k === k);
+  opt[k] = clamp(opt[k] + d, 1, r.n); writeHash();
+  if (overlay === 'settings') panel.innerHTML = settingsHTML();
+}
+panel.addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  settingsRow = SET_ROWS.findIndex(r => r.k === b.dataset.k);
+  changeSetting(b.dataset.k, b.dataset.act === 'inc' ? 1 : -1);
+});
+
+// ---------- help box (in-race) ----------
+const KEYHELP = [['↑ / W', 'THROTTLE'], ['↓ / S', 'BRAKE, THEN REVERSE'], ['← → / A D', 'STEER'], ['SPACE', 'BACK ON TRACK (3 S WAIT)'],
+  ['+ / -', 'ZOOM IN / OUT'], ['M', 'WHOLE CIRCUIT'], ['C', 'CAMERA FIXED / CHASE'], ['H', 'THIS HELP'], ['O', 'SETTINGS'],
+  ['P', 'PAUSE'], ['V', 'SOUND ON / OFF'], ['R', 'RESTART'], ['ESC', 'PAUSE / MENU']];
+function gapText(c, lead, i) {
+  if (i === 0) return 'LEADER';
+  if (c.fin && lead.fin) return '+' + (c.finT - lead.finT).toFixed(3);
+  const lapsDown = Math.floor((lead.prog - c.prog) / race.T.N);
+  if (lapsDown >= 1) return `+${lapsDown} LAP${lapsDown > 1 ? 'S' : ''}`;
+  // time gap: distance behind the leader at the leader's average speed
+  const v = Math.max(50, (lead.prog * STEP) / Math.max(1, race.t));
+  return '+' + ((lead.prog - c.prog) * STEP / v).toFixed(1);
+}
+function helpHTML() {
+  const P = race.player, st = standings(race.cars);
+  const fastest = Math.min(...race.cars.map(c => c.best));
+  const fastCar = race.cars.find(c => c.best === fastest);
+  const keysT = KEYHELP.map(([k, v]) => `<tr><td class="k">${k}</td><td>${v}</td></tr>`).join('');
+  const lb = st.map((c, i) => `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${c.isP ? 'YOU' : 'CAR ' + c.num}</td><td>${gapText(c, st[0], i)}</td><td>${fmt(c.last)}</td><td>${fmt(c.best)}</td></tr>`).join('');
+  const t = race.track, lapShown = clamp(Math.max(1, P.lap), 1, race.laps);
+  return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()}</div>
+  <div class="cols"><div><h3>KEYS</h3><table>${keysT}</table></div>
+  <div><h3>STATUS</h3><table>
+   <tr><td>LAP</td><td>${lapShown} / ${race.laps}</td></tr>
+   <tr><td>POSITION</td><td>${st.indexOf(P) + 1} / 4</td></tr>
+   <tr><td>RACE TIME</td><td>${fmt(P.fin ? P.finT : race.t)}</td></tr>
+   <tr><td>YOUR LAST</td><td>${fmt(P.last)}</td></tr>
+   <tr><td>YOUR BEST</td><td>${fmt(P.best)}</td></tr>
+   <tr><td>FASTEST LAP</td><td>${isFinite(fastest) ? fmt(fastest) + ' · ' + (fastCar.isP ? 'YOU' : 'CAR ' + fastCar.num) : '-:--.---'}</td></tr>
+   <tr><td>SETTINGS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
+   <tr><td>RACE</td><td>${opt.diff} · ${opt.cam}</td></tr></table>
+  <h3>LEADERBOARD</h3><table><tr><th>POS</th><th>DRIVER</th><th>GAP</th><th>LAST</th><th>BEST</th></tr>${lb}</table></div></div>
+  <div class="keys">[H] [ESC] CLOSE</div>`;
+}
+function tryRecover() {
+  if (!race || mode !== 'race' || paused) return;
+  if (recover(race.player, race.T)) beep(330, 0.12); else if (!race.player.wait) flash('ON TRACK · SPACE ONLY WHEN OFF TRACK OR FACING BACKWARDS');
+}
 function resultsHTML() {
   const st = standings(race.cars), P = race.player;
   const lead = st[0];
@@ -499,40 +723,84 @@ function resultsHTML() {
 }
 
 // ---------- input ----------
-const GAMEKEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
+const GAMEKEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
+const PAUSE_HTML = '<h2>PAUSED</h2><div class="keys">[P] RESUME &nbsp; [H] HELP &nbsp; [O] SETTINGS &nbsp; [R] RESTART &nbsp; [ESC] MENU</div>';
+function settingsKeys(e) {
+  if (e.code === 'ArrowUp') settingsRow = (settingsRow + SET_ROWS.length - 1) % SET_ROWS.length;
+  else if (e.code === 'ArrowDown') settingsRow = (settingsRow + 1) % SET_ROWS.length;
+  else if (e.code === 'ArrowLeft' || e.key === '-') changeSetting(SET_ROWS[settingsRow].k, -1);
+  else if (e.code === 'ArrowRight' || e.key === '+') changeSetting(SET_ROWS[settingsRow].k, 1);
+  else if (e.code === 'Escape' || e.code === 'KeyO') { closeOverlay(); if (race && settingsFromPause) openOverlay('pause', PAUSE_HTML); return true; }
+  else return false;
+  panel.innerHTML = settingsHTML(); return true;
+}
+let settingsFromPause = false;
 addEventListener('keydown', e => {
-  keys[e.code] = true; if (e.key === ' ') keys.Space = true;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (mode === 'menu') {
-    const c = gridCols();
-    if (e.code === 'ArrowRight') selectTrack(opt.sel + 1);
-    else if (e.code === 'ArrowLeft') selectTrack(opt.sel - 1);
-    else if (e.code === 'ArrowDown') selectTrack(Math.min(TRACKS.length - 1, opt.sel + c));
-    else if (e.code === 'ArrowUp') selectTrack(Math.max(0, opt.sel - c));
-    else if (e.code === 'Enter') startRace();
-    else return;
-    e.preventDefault(); return;
+    let handled = true;
+    if (overlay === 'settings') handled = settingsKeys(e);
+    else if (detailOpen) {
+      if (e.code === 'ArrowRight') selectTrack(opt.sel + 1);
+      else if (e.code === 'ArrowLeft') selectTrack(opt.sel - 1);
+      else if (e.code === 'Enter') startRace();
+      else if (e.code === 'Escape') closeDetail();
+      else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); }
+      else handled = false;
+    } else {
+      const c = gridCols();
+      if (e.code === 'ArrowRight') selectTrack(opt.sel + 1);
+      else if (e.code === 'ArrowLeft') selectTrack(opt.sel - 1);
+      else if (e.code === 'ArrowDown') selectTrack(Math.min(TRACKS.length - 1, opt.sel + c));
+      else if (e.code === 'ArrowUp') selectTrack(Math.max(0, opt.sel - c));
+      else if (e.code === 'Enter') openDetail();
+      else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); }
+      else handled = false;
+    }
+    if (handled) e.preventDefault();
+    return;
   }
-  if (GAMEKEYS.includes(e.key) || GAMEKEYS.includes(e.code)) e.preventDefault();
-  if (e.code === 'Escape') { if (mode === 'done' || paused) toMenu(); else { paused = true; showPanel('<h2>PAUSED</h2><div class="keys">[P] RESUME &nbsp; [R] RESTART &nbsp; [ESC] MENU</div>'); } }
-  else if (e.code === 'KeyP') { if (mode !== 'done') { paused = !paused; if (paused) showPanel('<h2>PAUSED</h2><div class="keys">[P] RESUME &nbsp; [R] RESTART &nbsp; [ESC] MENU</div>'); else panel.style.display = 'none'; } }
+  if (GAMEKEYS.includes(e.code) || e.key === '+' || e.key === '-') e.preventDefault();
+  // overlays that pause the race
+  if (overlay === 'settings') { settingsKeys(e); return; }
+  if (overlay === 'help') { if (e.code === 'KeyH' || e.code === 'Escape') closeOverlay(); return; }
+  if (overlay === 'pause') {
+    if (e.code === 'KeyP') closeOverlay();
+    else if (e.code === 'Escape') toMenu();
+    else if (e.code === 'KeyR') startRace();
+    else if (e.code === 'KeyH') openOverlay('help', helpHTML());
+    else if (e.code === 'KeyO') { settingsFromPause = true; openSettings(); }
+    return;
+  }
+  if (mode === 'done') {
+    if (e.code === 'Escape') toMenu(); else if (e.code === 'KeyR') startRace();
+    return;
+  }
+  keys[e.code] = true;
+  if (e.code === 'Escape' || e.code === 'KeyP') openOverlay('pause', PAUSE_HTML);
+  else if (e.code === 'KeyH') openOverlay('help', helpHTML());
+  else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); }
+  else if (e.code === 'Space') { if (!e.repeat) tryRecover(); }
+  else if (e.key === '+' || e.key === '=') { if (opt.zoom < 7) { opt.zoom++; writeHash(); } flash('ZOOM ' + opt.zoom); }
+  else if (e.key === '-' || e.key === '_') { if (opt.zoom > 1) { opt.zoom--; writeHash(); } flash('ZOOM ' + opt.zoom); }
   else if (e.code === 'KeyR') startRace();
-  else if (e.code === 'KeyC') { opt.cam = opt.cam === 'FIXED' ? 'CHASE' : 'FIXED'; flash('CAMERA ' + opt.cam); lsSet('vgp-opt', JSON.stringify(opt)); }
-  else if (e.code === 'KeyM') { fullView = !fullView; flash(fullView ? 'FULL CIRCUIT VIEW' : 'FOLLOW VIEW'); }
+  else if (e.code === 'KeyC') { opt.cam = opt.cam === 'FIXED' ? 'CHASE' : 'FIXED'; writeHash(); flash('CAMERA ' + opt.cam); }
+  else if (e.code === 'KeyM') { fullView = !fullView; flash(fullView ? 'WHOLE CIRCUIT' : 'FOLLOW VIEW'); }
   else if (e.code === 'KeyV') { muted = !muted; flash(muted ? 'SOUND OFF' : 'SOUND ON'); }
 });
-addEventListener('keyup', e => { keys[e.code] = false; if (e.key === ' ') keys.Space = false; });
+addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 function flash(m) { msg = m; msgT = 1.6; }
 function playerInput() {
   return {
     thr: (keys.ArrowUp || keys.KeyW || touch.g) ? 1 : 0,
-    brk: (keys.ArrowDown || keys.KeyS || keys.Space || touch.b) ? 1 : 0,
+    brk: (keys.ArrowDown || keys.KeyS || touch.b) ? 1 : 0,
     steer: ((keys.ArrowRight || keys.KeyD || touch.r) ? 1 : 0) - ((keys.ArrowLeft || keys.KeyA || touch.l) ? 1 : 0)
   };
 }
 document.querySelectorAll('#touch [data-t]').forEach(b => {
   const k = b.dataset.t;
-  const on = e => { e.preventDefault(); touch[k] = 1; audioInit(); }, off = e => { e.preventDefault(); touch[k] = 0; };
+  const on = e => { e.preventDefault(); audioInit(); if (k === 'x') tryRecover(); else touch[k] = 1; }, off = e => { e.preventDefault(); touch[k] = 0; };
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
 });
 
@@ -559,6 +827,7 @@ function drawWorld(z) {
   ctx.fillStyle = G; ctx.fill(P.SFf); ctx.strokeStyle = G; ctx.lineWidth = lw * 0.7; ctx.stroke(P.SF); ctx.stroke(P.SFf);
   // cars
   for (const c of race.cars) {
+    if (c.wait > 0 && (performance.now() / 150 | 0) % 2) continue;
     ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.a);
     if (c.isP) { glow(c.hit ? 18 : 10); ctx.strokeStyle = G; ctx.lineWidth = lw * 1.15; }
     else { glow(4); ctx.strokeStyle = c.hit ? G : '#2bd10f'; ctx.lineWidth = lw * 0.9; }
@@ -607,8 +876,6 @@ function drawHUD() {
   text('TIME ' + fmt(cur), pad, pad + 100 * DPR, 16);
   text('LAST ' + fmt(P.last), pad, pad + 120 * DPR, 16, P.newLap ? G : GD);
   text('BEST ' + fmt(P.best), pad, pad + 140 * DPR, 16, GD);
-  const rec = parseFloat(lsGet('vgp-best-' + race.track.id));
-  text('REC  ' + fmt(rec), pad, pad + 160 * DPR, 16, GD);
   // speed
   const kmh = Math.round(Math.abs(P.f) * 0.75);
   text(String(kmh).padStart(3, ' '), pad, H - pad - 26 * DPR, 48);
@@ -616,10 +883,12 @@ function drawHUD() {
   const bw = 220 * DPR, frac = clamp(Math.abs(P.f) / VMAX, 0, 1);
   ctx.strokeStyle = GD; ctx.lineWidth = DPR; ctx.strokeRect(pad, H - pad - 14 * DPR, bw, 10 * DPR);
   for (let i = 0; i < 20; i++) if (i / 20 < frac) { ctx.fillStyle = G; ctx.fillRect(pad + 2 * DPR + i * (bw - 4 * DPR) / 20, H - pad - 12 * DPR, (bw - 4 * DPR) / 20 - 2 * DPR, 6 * DPR); }
-  if (P.off && mode === 'race' && !P.fin) text('OFF TRACK', W / 2, H - pad - 30 * DPR, 22, (performance.now() / 200 | 0) % 2 ? G : GD, 'center');
+  const blink = (performance.now() / 200 | 0) % 2 ? G : GD;
+  if (P.wait > 0) { glow(14); text('BACK ON TRACK IN ' + Math.ceil(P.wait), W / 2, H * 0.3, 30, G, 'center'); glow(6); }
+  else if (mode === 'race' && !P.fin && canRecover(P, race.T)) text((P.off ? 'OFF TRACK' : 'WRONG WAY') + ' · SPACE TO RECOVER', W / 2, H - pad - 30 * DPR, 22, blink, 'center');
   if (P.newLap && P.lap === race.laps && !P.fin) text('FINAL LAP', W / 2, H * 0.28, 30, G, 'center');
   if (msgT > 0) text(msg, W / 2, H * 0.18, 18, G, 'center');
-  text('ARROWS/WASD DRIVE · SPACE BRAKE · C CAMERA · M MAP · V SOUND · P PAUSE · R RESTART · ESC MENU', W / 2, H - 8 * DPR, 11, GDD, 'center');
+  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · H HELP · O SETTINGS · P PAUSE · ESC MENU', W / 2, H - 8 * DPR, 11, GDD, 'center');
 }
 function drawLights() {
   const n = mode === 'lights' ? Math.min(5, Math.floor(lightsT / 0.8)) : 0;
@@ -646,7 +915,8 @@ function render(dt) {
     z = Math.min((W - 80 * DPR) / (T.maxX - T.minX + 2 * WALL), (H - 80 * DPR) / (T.maxY - T.minY + 2 * WALL));
     ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-(T.minX + T.maxX) / 2, -(T.minY + T.maxY) / 2);
   } else {
-    z = Math.min(W, H) / 560;
+    zoomCur += (opt.zoom - zoomCur) * Math.min(1, dt * 8);
+    z = Math.min(W, H) / (560 * Math.pow(1.4, 7 - zoomCur));
     const tx = P.x + P.vx * 0.45, ty = P.y + P.vy * 0.45, k = Math.min(1, dt * 5);
     camX += (tx - camX) * k; camY += (ty - camY) * k;
     if (opt.cam === 'CHASE') { ctx.translate(W / 2, H * 0.64); ctx.scale(z, z); ctx.rotate(-P.a - Math.PI / 2); ctx.translate(-P.x, -P.y); }
@@ -670,18 +940,14 @@ function update(dt) {
     if (lightsT >= goAt) { mode = 'race'; race.t = 0; beep(880, 0.35); }
     return;
   }
+  const P0 = race.player; P0.steerLv = opt.steer; P0.brakeLv = opt.brake;
   const inp = playerInput();
   const H2 = 1 / 120; acc += dt;
   while (acc >= H2) { simTick(race, inp, H2); acc -= H2; }
   const P = race.player;
-  if (P.lapEvent && P.last > 0) {
-    P.lapEvent = false;
-    const rec = parseFloat(lsGet('vgp-best-' + race.track.id));
-    if (!rec || P.last < rec) { lsSet('vgp-best-' + race.track.id, P.last.toFixed(3)); flash('NEW CIRCUIT RECORD ' + fmt(P.last)); }
-  }
   if (P.fin && mode === 'race') { mode = 'done'; race.doneAt = race.t; }
   if (mode === 'done') {
-    if (!race.doneShown && race.t - race.doneAt > 1.2) { race.doneShown = true; showPanel(resultsHTML()); }
+    if (!race.doneShown && race.t - race.doneAt > 1.2) { race.doneShown = true; openOverlay('results', resultsHTML()); }
     else if (race.doneShown && race.t - (race.panelT || 0) > 0.5) { race.panelT = race.t; panel.innerHTML = resultsHTML(); }
   }
   if (engG) {
@@ -693,12 +959,14 @@ function frame(ts) {
   const dt = Math.min(0.05, (ts - (lastTs || ts)) / 1000); lastTs = ts;
   update(dt);
   if (mode !== 'menu') render(dt);
+  else if (detailOpen) drawDetail(ts);
   if (mode === 'lights' && engG) engG.gain.setTargetAtTime(muted ? 0 : 0.012, AC.currentTime, 0.1);
   requestAnimationFrame(frame);
 }
 
 resize();
 buildMenu();
+writeHash();
 if (matchMedia('(pointer:coarse)').matches) document.getElementById('touch').style.display = 'block';
 requestAnimationFrame(frame);
 </script>

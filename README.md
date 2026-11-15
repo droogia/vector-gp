@@ -4,32 +4,72 @@ A single-file, no-dependency HTML racing game (green-on-black "acid" interface) 
 style of 80s monochrome vector arcade games. Four Formula 1-style cars race top-down on
 real Grand Prix circuits: the full 2026 calendar plus circuits from past championships.
 
-Everything runs locally in the browser: open `vector-gp.html` and play. Nothing is
-uploaded anywhere.
+Everything runs in the browser: open `vector-gp.html` (or `index.html`, which forwards to
+it) and play. Nothing is uploaded anywhere.
 
 ## Usage
 
-1. Pick a circuit from the menu (click, or arrow keys), the number of laps (1, 3, 5, 10),
-   the AI level (Easy, Normal, Hard) and the camera (Fixed or Chase).
-2. Press **Start** or Enter (double-clicking a circuit also starts the race).
-3. Wait for the five red lights to go out, then race. You start from the back of the grid.
+Online: https://droogia.github.io/vector-gp/
+
+1. Pick a circuit in the list (click or arrow keys). Enter or a double click opens the
+   circuit box: a large map with a marker driving a lap, and the circuit's data (Grand Prix,
+   location, 2026 round or F1 years, length, direction, race distance).
+2. In the box, set laps (1, 3, 5, 10), AI level (Easy, Normal, Hard) and camera (Fixed,
+   Chase). Left/Right move to the previous/next circuit; Esc goes back to the list.
+3. **Start** or Enter starts the race. Wait for the five lights to go out. You start from
+   the back of the grid.
 
 | Key | Action |
 |---|---|
-| Arrows / WASD | Drive (up = throttle, down = brake / reverse, left/right = steer) |
-| Space | Brake |
-| C | Switch camera: Fixed (north up) or Chase (car points up) |
-| M | Full circuit view |
-| V | Sound on/off |
+| ↑ / W | Throttle |
+| ↓ / S | Brake, then reverse once stopped |
+| ← → / A D | Steer |
+| Space | Back on track: when off the track or facing backwards, the car is put on the centre line, facing the race direction, and waits 3 seconds (other cars drive through it meanwhile) |
+| + / - | Zoom in / out, 7 levels (7 = closest, the default) |
+| M | Whole circuit view |
+| C | Camera: Fixed (north up) or Chase (car points up) |
+| H | Help box: keys, race status and leaderboard (pauses the race) |
+| O | Settings (pauses the race; also available in the menu) |
 | P | Pause |
+| V | Sound on/off |
 | R | Restart the race |
-| Esc | Pause, then back to the menu |
+| Esc | Pause, then back to the menu (the box of the circuit just raced) |
 
-On a touch screen, on-screen buttons appear (steer left/right, brake, throttle).
+All driving controls are on the arrow keys, so the game can be played with one hand.
+On a touch screen, on-screen buttons appear (steer, brake, throttle, back on track).
 
-The HUD shows lap, position, race time, last and best lap, the circuit record, a speedometer,
-a mini-map and the running order. The best lap on each circuit is kept as the circuit record
-in the browser's local storage.
+### Settings
+
+| Setting | Levels | Effect |
+|---|---|---|
+| Steering | 1–5, default 3 | How quickly the steering reaches full lock and how sharply the car can turn |
+| Brakes | 1–5, default 3 | Braking force, about ±15% per level |
+| Zoom | 1–7, default 7 | Each level down shows about 40% more track |
+
+Steering and brakes apply to your car only; the AI cars are set by the AI level.
+
+### Settings in the address
+
+The game uses no browser storage. All settings live in the page address, in a readable
+code that updates as you change them, for example:
+
+```
+https://droogia.github.io/vector-gp/#MON-L5-H-C-S2-B4-Z6
+```
+
+| Part | Meaning |
+|---|---|
+| `MON` | Circuit id (see the lists below) |
+| `L5` | Laps: 1, 3, 5 or 10 |
+| `H` | AI level: `E`asy, `N`ormal, `H`ard |
+| `C` | Camera: `F`ixed, `C`hase |
+| `S2` | Steering 1–5 |
+| `B4` | Brakes 1–5 |
+| `Z6` | Zoom 1–7 |
+
+Bookmark the address to keep a setup, or share it. Parts can be in any order and are not
+case-sensitive; missing or invalid parts use the defaults (`AUS-L3-N-F-S3-B3-Z7`). Lap times
+are not stored: the HUD and the help box show this race's last, best and fastest laps.
 
 ## Circuits
 
@@ -96,7 +136,8 @@ The circuit list, names, dates and the per-circuit options are at the top of
   tangent, normal, curvature, barrier distance and a target speed for the AI (corner speed
   limit, then a braking pass backwards around the lap).
 - **Cars**: arcade physics with throttle, brakes, drag, a speed-dependent steering rate and
-  partial grip, so the car slides a little when turning hard. Off the track (beyond the
+  partial grip, so the car slides a little when turning hard. The steering and brake
+  settings scale the player car's steering speed, turn rate and braking force. Off the track (beyond the
   edge lines) there is much more drag. Barriers bounce the car and turn its nose along the
   wall, so it never gets pinned.
 - **AI**: steers toward a point ahead on its own line, follows the speed profile scaled by its
@@ -123,7 +164,9 @@ npm test
 
 The tests load the game logic straight from `vector-gp.html` and check that every circuit
 has the right length and drivable geometry, that a single AI car laps each circuit without
-touching a barrier, and that a full field of four finishes a race on every circuit.
+touching a barrier, that a full field of four finishes a race on every circuit, the
+settings code in the address (round trip, invalid input), the back-on-track rules, and that
+higher steering and brake levels turn faster and stop sooner.
 
 ## License
 
