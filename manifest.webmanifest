@@ -1,0 +1,17 @@
+{
+  "name": "VECTOR GP",
+  "short_name": "VECTOR GP",
+  "description": "Top-down 80s vector Formula 1 racing on real Grand Prix circuits, solo or online with friends.",
+  "start_url": "./vector-gp.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["games"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

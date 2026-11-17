@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="VECTOR GP">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>VECTOR GP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -70,15 +78,80 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
 #panel .cols td,#panel .cols th{white-space:nowrap;padding:3px 10px}
 .pip{display:inline-block;width:18px;height:12px;border:1px solid var(--gd);margin-right:4px}
 .pip.on{background:var(--g);border-color:var(--g);box-shadow:0 0 6px var(--g)}
+#toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:30;background:#000;border:1px solid var(--g);box-shadow:0 0 12px rgba(57,255,20,.5);padding:8px 18px;letter-spacing:.06em;display:none;max-width:92vw;text-align:center}
+#panel .code{font-size:46px;letter-spacing:.22em;margin:14px 0 6px;text-shadow:0 0 12px var(--g);user-select:text}
+#panel .link{color:var(--gd);font-size:14px;word-break:break-all;max-width:520px;margin:0 auto 6px;user-select:text}
+#panel .btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
+#panel .btns button.go{color:var(--g);border-color:var(--g);text-shadow:0 0 8px var(--g);box-shadow:0 0 8px var(--g)}
+#panel .btns button.off{opacity:.4;cursor:default;box-shadow:none;text-shadow:none}
+#panel .err{color:var(--g);margin:12px 0;text-shadow:0 0 6px var(--g)}
+#panel input{background:#000;color:var(--g);border:1px solid var(--g);font:inherit;font-size:34px;letter-spacing:.2em;text-align:center;width:9em;padding:6px 8px;margin:14px 0 4px;text-transform:uppercase;user-select:text;box-shadow:0 0 8px rgba(57,255,20,.5) inset;outline:none}
+#mpbtn.on{color:var(--g);border-color:var(--g)}
+#ver{font-size:15px;letter-spacing:.1em;color:var(--gd);cursor:pointer;text-shadow:none;vertical-align:middle;border:1px solid var(--gdd);padding:1px 8px;margin-left:10px}
+#ver:hover{color:var(--g);border-color:var(--g)}
+html,body,#touch,#tmenu,#panel,#menu,#detail{touch-action:manipulation}
+html{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+#game{touch-action:none}
+:root{--tb:min(84px,calc((100vw - 40px)/4))}
 #touch{display:none;position:fixed;inset:auto 0 0 0;height:0;z-index:12}
-#touch div{position:fixed;bottom:22px;width:84px;height:84px;border:1px solid var(--gd);color:var(--gd);display:flex;align-items:center;justify-content:center;font-size:20px;touch-action:none;background:rgba(0,0,0,.3)}
+#touch div{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));width:var(--tb);height:var(--tb);border:1px solid var(--gd);color:var(--gd);display:flex;align-items:center;justify-content:center;font-size:calc(var(--tb)*.26);touch-action:none;background:rgba(0,0,0,.35)}
+#touch div.down{color:var(--g);border-color:var(--g);background:rgba(57,255,20,.18);box-shadow:0 0 10px var(--g) inset}
+#touch [data-t=l]{left:calc(8px + env(safe-area-inset-left))}
+#touch [data-t=r]{left:calc(16px + var(--tb) + env(safe-area-inset-left))}
+#touch [data-t=g]{right:calc(8px + env(safe-area-inset-right))}
+#touch [data-t=b]{right:calc(16px + var(--tb) + env(safe-area-inset-right))}
+#touch [data-t=x]{right:calc(8px + env(safe-area-inset-right));bottom:calc(26px + var(--tb) + env(safe-area-inset-bottom));height:calc(var(--tb)*.7)}
+#tmenu{display:none;position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:12;width:48px;height:40px;align-items:center;justify-content:center;border:1px solid var(--gd);color:var(--gd);background:rgba(0,0,0,.4);font-size:22px;touch-action:none}
+#tmenu.down{color:var(--g);border-color:var(--g)}
+body.touch button{min-height:40px;padding:8px 14px}
+body.touch #panel .keys{display:none}
+body.tilt #touch [data-t=l],body.tilt #touch [data-t=r]{display:none}
+body.touch #panel table.set button{min-width:44px}
+body.touch .foot{display:none}
+@media (max-width:820px){
+  #menu{padding:12px 12px 28px}
+  h1{font-size:26px;letter-spacing:.2em}
+  .sub{font-size:13px;letter-spacing:.04em}
+  .bar{position:static;gap:10px 12px;padding:10px 0}
+  .opt{flex-wrap:wrap}
+  #grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .card canvas{height:96px}
+  .card .n{font-size:14px}.card .r{font-size:12px}
+  #detail .box{width:100vw;height:100vh;height:100dvh;border:0;padding:10px 12px 0;padding-top:calc(10px + env(safe-area-inset-top));overflow:auto;display:block}
+  #detail .main{flex-direction:column;gap:8px;display:flex}
+  #dmap{flex:none;width:100%;height:34vh;height:34dvh}
+  #dinfo{flex:none;overflow:visible}#dinfo h2{font-size:18px;margin-bottom:6px}#dinfo td{padding:2px 8px 2px 0;font-size:14px}
+  #detail .dopts{gap:8px 12px;margin-top:10px}
+  #detail .nav{flex-wrap:wrap;gap:8px;margin-top:10px;padding:8px 0 calc(8px + env(safe-area-inset-bottom));position:sticky;bottom:0;background:#000;border-top:1px solid var(--gdd)}
+  #detail .nav .sp{flex:1 1 100%;order:-1}
+  #panel{padding:14px;min-width:0;width:94vw}
+  #panel table.set{width:100%;table-layout:auto}
+  #panel .cols{flex-direction:column;gap:6px}
+  #panel .code{font-size:34px}
+  #panel input{font-size:28px;width:7.5em}
+  #panel .cols td,#panel .cols th{padding:2px 8px}
+  #toast{top:calc(8px + env(safe-area-inset-top))}
+}
+@media (max-height:520px) and (orientation:landscape){
+  #menu{padding:8px 12px 20px}
+  h1{font-size:22px}.sub{display:none}
+  #detail .box{width:100vw;height:100dvh;border:0;padding:6px 12px}
+  #detail .main{gap:10px}
+  #dinfo h2{font-size:16px;margin-bottom:4px}#dinfo td{padding:1px 8px 1px 0;font-size:13px}
+  #detail .dopts{gap:6px 10px;margin-top:6px}#detail .opt span{margin-right:0}
+  #detail .nav{margin-top:6px}
+  #panel{padding:12px 16px;max-height:96vh}
+  #panel h2{font-size:18px;margin-bottom:2px}
+  #panel table{margin:6px auto}#panel table.set td{padding:3px 6px}#panel table.set tr.note td{padding:0 6px 4px;font-size:12px}
+  #panel .code{font-size:30px;margin:6px 0}
+}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 <div id="menu">
-  <h1>VECTOR GP</h1>
-  <div class="sub">2026 CALENDAR + PAST CHAMPIONSHIPS · 40 CIRCUITS · RACES OF 2 TO 8 CARS · TIME TRIAL · TOP-DOWN VECTOR RACING</div>
+  <h1>VECTOR GP <small id="ver" title="Tap to fetch the latest version"></small></h1>
+  <div class="sub">2026 CALENDAR + PAST CHAMPIONSHIPS · 40 CIRCUITS · RACES OF 2 TO 8 CARS · ONLINE MULTIPLAYER · TIME TRIAL · TOP-DOWN VECTOR RACING</div>
   <div class="bar">
     <div id="selname"></div>
     <div class="opt"><span>LAPS</span><button data-o="laps" data-v="1">1</button><button data-o="laps" data-v="3">3</button><button data-o="laps" data-v="5">5</button><button data-o="laps" data-v="10">10</button></div>
@@ -88,14 +161,18 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
     <div class="opt"><span>GRID</span><button data-o="grid" data-v="BACK">BACK</button><button data-o="grid" data-v="RANDOM">RANDOM</button><button data-o="grid" data-v="POLE">POLE</button></div>
     <div class="opt"><span>LIMITS</span><button data-o="limits" data-v="0">OFF</button><button data-o="limits" data-v="1">ON</button></div>
     <div class="opt"><span>MODE</span><button data-o="mode" data-v="RACE">RACE</button><button data-o="mode" data-v="TT">TIME TRIAL</button></div>
+    <button id="mpbtn">MULTIPLAYER</button>
+    <button id="instbtn" style="display:none">INSTALL</button>
+    <button id="fsbtn" style="display:none">FULLSCREEN</button>
     <button id="setbtn">OPTIONS</button>
     <button id="go">START ▶</button>
   </div>
   <div id="grid"></div>
-  <div class="foot">ARROWS SELECT · ENTER OR DOUBLE-CLICK OPENS THE CIRCUIT · 1 3 5 0 LAPS · 2 4 6 8 CARS · G GRID · R N P AI · L LIMITS · Q TIME TRIAL · F C CAMERA · O OPTIONS · H HELP · T MUSIC · V SOUND · SETTINGS ARE KEPT IN THE PAGE ADDRESS (#CODE): BOOKMARK IT<br>
+  <div class="foot">ARROWS SELECT · ENTER OR DOUBLE-CLICK OPENS THE CIRCUIT · 1 3 5 0 LAPS · 2 4 6 8 CARS · G GRID · R N P AI · L LIMITS · Q TIME TRIAL · F C CAMERA · O OPTIONS · H HELP · T MUSIC · V SOUND · M MULTIPLAYER · SETTINGS ARE KEPT IN THE PAGE ADDRESS (#CODE): BOOKMARK IT<br>
   Bahrain and Saudi Arabia were cancelled from the 2026 calendar but stay playable. Circuit outlines come from surveyed geometry (bacinger/f1-circuits, MIT licence), smoothed and widened for the game, with real lengths, start lines and racing directions.</div>
 </div>
 <div id="panel"></div>
+<div id="toast"></div>
 <div id="detail"><div class="box">
   <div class="main"><canvas id="dmap"></canvas><div id="dinfo"></div></div>
   <div class="dopts">
@@ -107,16 +184,16 @@ button.on{color:var(--g);border-color:var(--g);text-shadow:0 0 6px var(--g);box-
     <div class="opt"><span>LIMITS</span><button data-o="limits" data-v="0">OFF</button><button data-o="limits" data-v="1">ON</button></div>
     <div class="opt"><span>MODE</span><button data-o="mode" data-v="RACE">RACE</button><button data-o="mode" data-v="TT">TIME TRIAL</button></div>
   </div>
-  <div class="nav"><button id="dprev">◀ PREV</button><button id="dback">BACK [ESC]</button><span class="sp" id="dpos"></span><button id="dgo">START ▶ [ENTER]</button><button id="dnext">NEXT ▶</button></div>
+  <div class="nav"><button id="dprev">◀ PREV</button><button id="dback">BACK [ESC]</button><button id="dmp">MULTIPLAYER [M]</button><span class="sp" id="dpos"></span><button id="dgo">START ▶ [ENTER]</button><button id="dnext">NEXT ▶</button></div>
 </div></div>
 <div id="touch">
-  <div data-t="l" style="left:18px">◀</div><div data-t="r" style="left:116px">▶</div>
-  <div data-t="b" style="right:116px">BRK</div><div data-t="x" style="right:18px;bottom:122px">↺</div><div data-t="g" style="right:18px">GAS</div>
+  <div data-t="l">◀</div><div data-t="r">▶</div><div data-t="b">BRK</div><div data-t="x">↺</div><div data-t="g">GAS</div>
 </div>
+<div id="tmenu">☰</div>
 <div class="vig"></div><div class="scan"></div>
 <script>
 'use strict';
-/* VECTOR GP v3.0 — single-file browser racing game */
+/* VECTOR GP — single-file browser racing game */
 /* Circuit geometry derived from bacinger/f1-circuits (https://github.com/bacinger/f1-circuits)
    Copyright (c) 2019-2025 Tomislav Bacinger, MIT License. Smoothed and widened for gameplay. */
 const TRACKS=[
@@ -163,6 +240,7 @@ const TRACKS=[
 ];
 
 // ===== CORE: track geometry, car physics, AI (no DOM) =====
+const APP_VERSION = '3.2.1';   // keep in step with package.json and sw.js (a test checks)
 const K_SCALE = 1900;          // world units per km
 const STEP = 10;               // centerline sample spacing
 const HALF = 44;               // half track width
@@ -173,6 +251,7 @@ const DIFF = { ROOKIE: [.80, .83, .86], NORMAL: [.88, .91, .94], PRO: [.95, .98,
 const STEER_RATE = [0.75, 0.88, 1, 1.12, 1.25];   // how hard the car can turn
 const STEER_RAMP = [3.5, 5, 7, 9.5, 12];           // how fast the steering reaches full lock (per s)
 const BRAKE_LV = [0.70, 0.85, 1, 1.15, 1.30];      // braking force
+const NEUTRAL = { thr: 0, brk: 0, steer: 0 };
 const RECOVER_WAIT = 3;
 const REVERSE_DELAY = 1;
 const DRAFT_GAIN = 0.04;                           // slipstream: up to +4% top speed, less drag
@@ -398,7 +477,7 @@ function afterStep(c, race, prevLap, dt) {
       c.lapStart = race.t; c.lapPen = 0; c.secPen = 0; c.secStartT = race.t; c.sec = 0; c.cur = [];
       c.newLap = 1.5; c.lapEvent = true;
     } else if (c.lap === 1) { c.sec = 0; c.cur = []; }
-    if (c.lap > race.laps && !c.fin) { c.fin = true; c.finT = race.t; if (c.isP) { c.auto = true; c.skill = 0.6; } }
+    if (c.lap > race.laps && !c.fin) { c.fin = true; c.finT = race.t; if (c.isP || c.human) { c.auto = true; c.skill = 0.6; } }
   }
 }
 // live gap to the reference lap at the same point of the lap (negative = faster)
@@ -425,7 +504,7 @@ function simTick(race, input, dt) {
   for (const c of cars) {
     const prevLap = c.lap;
     if (c.wait > 0) { c.wait = Math.max(0, c.wait - dt); continue; }
-    const ctl = c.auto ? aiControl(c, T, cars) : input;
+    const ctl = c.auto ? aiControl(c, T, cars) : c.remote ? (c.inp || NEUTRAL) : input;
     stepCar(c, T, ctl, dt);
     afterStep(c, race, prevLap, dt);
     if (c.hit) c.hit = Math.max(0, c.hit - dt);
@@ -450,14 +529,16 @@ function recover(c, T) {
   return true;
 }
 
-// settings <-> readable URL code, e.g. AUS-L3-N-F-S3-B3-Z7-C4-GB (+ TL, Q, GH0 when set)
+// settings <-> readable URL code, e.g. AUS-L3-N-F-S3-B3-Z7-C4-GB (+ TL, Q, GH0, GY0, Y1-5 when set)
 const SETTINGS_DEFAULT = { track: 'AUS', laps: 3, diff: 'NORMAL', cam: 'FIXED', steer: 3, brake: 3, zoom: 7,
-  cars: 4, grid: 'BACK', limits: 0, mode: 'RACE', ghost: 1 };
+  cars: 4, grid: 'BACK', limits: 0, mode: 'RACE', ghost: 1, tilt: 1, tiltRange: 3 };
 function encodeSettings(o) {
   const p = [o.track, 'L' + o.laps, o.diff[0], o.cam[0], 'S' + o.steer, 'B' + o.brake, 'Z' + o.zoom, 'C' + o.cars, 'G' + o.grid[0]];
   if (o.limits) p.push('TL');
   if (o.mode === 'TT') p.push('Q');
   if (!o.ghost) p.push('GH0');
+  if (o.tilt === 0) p.push('GY0');
+  if (o.tiltRange && o.tiltRange !== 3) p.push('Y' + o.tiltRange);
   return p.join('-');
 }
 function decodeSettings(code, tracks) {
@@ -477,8 +558,30 @@ function decodeSettings(code, tracks) {
     else if (p === 'TL') o.limits = 1;
     else if (p === 'Q') o.mode = 'TT';
     else if (p === 'GH0') o.ghost = 0;
+    else if (p === 'GY0') o.tilt = 0;
+    else if ((m = /^Y([1-5])$/.exec(p))) o.tiltRange = +m[1];
   }
   return o;
+}
+
+// ----- tilt steering: the phone is a steering wheel -----
+// Turns the phone's orientation (deviceorientation beta/gamma, degrees) and the screen's rotation (0, 90, 180, 270:
+// 90 = landscape with the top of the phone on the left) into the wheel angle in degrees, clockwise positive,
+// whichever way the phone is held. null when it lies too flat for the angle to mean anything.
+function tiltAngle(beta, gamma, screenAngle) {
+  const b = beta * Math.PI / 180, g = gamma * Math.PI / 180;
+  const ux = -Math.cos(b) * Math.sin(g), uy = Math.sin(b);       // the world's up, in the phone's own axes
+  const a = ((Math.round(screenAngle / 90) * 90) % 360 + 360) % 360;
+  const [sx, sy] = a === 90 ? [-uy, ux] : a === 270 ? [uy, -ux] : a === 180 ? [-ux, -uy] : [ux, uy];   // ... and on the screen
+  if (Math.hypot(sx, sy) < 0.25) return null;
+  return -Math.atan2(sx, sy) * 180 / Math.PI;
+}
+const TILT_RANGE = [40, 34, 28, 22, 16];   // degrees of wheel for full lock, by the "tilt range" level (3 = default)
+const TILT_DEAD = 3;                       // degrees around the neutral position that do nothing
+function tiltSteer(angle, zero, level) {   // -1..1
+  const d = ((angle - zero + 540) % 360 + 360) % 360 - 180, r = TILT_RANGE[clamp(level || 3, 1, 5) - 1];
+  const m = clamp((Math.abs(d) - TILT_DEAD) / (r - TILT_DEAD), 0, 1);
+  return d < 0 ? -m : m;
 }
 
 // a race field: AI skills spread over the AI level's range, fastest at the front of the grid
@@ -499,6 +602,321 @@ function standings(cars) {
   return cars.slice().sort((a, b) => (a.fin && b.fin) ? raceTime(a) - raceTime(b) : a.fin ? -1 : b.fin ? 1 : b.prog - a.prog);
 }
 
+// ===== NETPLAY: rooms, host and guest sessions, prediction (no DOM, no transport) =====
+// The host runs the whole simulation (AI cars included) and streams snapshots; guests send their
+// inputs and predict their own car. Sessions talk through send(chan, text) functions the transport
+// provides: chan 'c' is reliable (room, start, lap data), 'g' is unreliable (inputs, snapshots).
+const PROTO = 2;
+const MAX_HUMANS = 8;
+const SIM_H = 1 / 120;                 // one simulation step
+const SNAP_EVERY = 4;                  // steps between snapshots: 30 per second
+const INTERP = 0.1;                    // seconds: other cars are drawn this far behind the newest snapshot
+const INPUT_Q = 6;                     // input steps the host holds per remote driver before it skips ahead
+const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // no I, L, O, 0, 1
+const TIMEOUT_MS = 12000;              // a silent peer is dropped after this long
+
+function newCode(rnd) { let s = ''; for (let i = 0; i < 6; i++) s += CODE_CHARS[Math.floor(rnd() * CODE_CHARS.length)]; return s; }
+function normCode(s) {
+  s = String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return s.length === 6 && [...s].every(ch => CODE_CHARS.includes(ch)) ? s : null;
+}
+function showCode(c) { return c.slice(0, 3) + '-' + c.slice(3); }
+function hashSeed(s) { let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry32(a) {
+  return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+function shuffle(a, rnd) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// Who starts where: slots[s] is the player id of the human on grid slot s, or -1 for an AI car;
+// skills[k] belongs to the k-th AI car in grid order (fastest at the front, as in a solo race).
+function planField(n, pids, diff, grid, rnd) {
+  const h = pids.length, nAI = n - h, [lo, mid, hi] = DIFF[diff];
+  const all = Array.from({ length: n }, (_, i) => i);
+  const hs = grid === 'POLE' ? all.slice(0, h) : grid === 'RANDOM' ? shuffle(all.slice(), rnd).slice(0, h).sort((a, b) => a - b) : all.slice(n - h);
+  const order = shuffle(pids.slice(), rnd), slots = new Array(n).fill(-1);
+  hs.forEach((s, k) => { slots[s] = order[k]; });
+  const skills = Array.from({ length: nAI }, (_, k) => nAI === 1 ? mid : hi - (hi - lo) * k / (nAI - 1));
+  return { slots, skills };
+}
+function buildField(T, plan) {
+  const humans = plan.slots.filter(p => p >= 0), base = Math.max(...humans) + 1;
+  let k = 0;
+  return plan.slots.map((pid, s) => {
+    if (pid >= 0) { const c = makeCar(T, s, false, 1, pid + 1); c.human = true; c.pid = pid; c.auto = false; c.name = 'P' + (pid + 1); return c; }
+    const c = makeCar(T, s, false, plan.skills[k], base + 1 + k); k++; return c;
+  });
+}
+function carName(c) { return c.isP ? 'YOU' : c.name || 'CAR ' + c.num; }
+// a multiplayer race as seen by player myPid (the host is player 0); no ghost or delta online
+function makeMpRace(track, cfg, plan, myPid) {
+  const T = buildTrack(track), cars = buildField(T, plan), P = cars.find(c => c.pid === myPid);
+  if (!P) return null;
+  P.isP = true;
+  return { t: 0, T, cars, laps: cfg.laps, tt: false, limits: !!cfg.limits, started: true, track, player: P, doneShown: false };
+}
+
+// what a host sends and a guest accepts: the shared race options
+function cleanCfg(c) {
+  if (!c || typeof c !== 'object') return null;
+  const track = TRACKS.find(t => t.id === c.track);
+  if (!track || ![1, 3, 5, 10].includes(c.laps) || typeof c.diff !== 'string' || !Object.hasOwn(DIFF, c.diff) || ![2, 4, 6, 8].includes(c.cars) || !['BACK', 'RANDOM', 'POLE'].includes(c.grid)) return null;
+  return { track: track.id, laps: c.laps, diff: c.diff, cars: c.cars, grid: c.grid, limits: c.limits ? 1 : 0 };
+}
+function cleanPlan(p, myPid) {
+  if (!p || !Array.isArray(p.slots) || !Array.isArray(p.skills) || p.slots.length < 2 || p.slots.length > MAX_HUMANS) return null;
+  const hum = p.slots.filter(x => x >= 0);
+  if (!p.slots.every(x => Number.isInteger(x) && x >= -1 && x < MAX_HUMANS) || new Set(hum).size !== hum.length || !hum.includes(myPid)) return null;
+  if (p.skills.length !== p.slots.length - hum.length || !p.skills.every(x => typeof x === 'number' && x >= 0.5 && x <= 1.2)) return null;
+  return { slots: p.slots.slice(), skills: p.skills.slice() };
+}
+
+// inputs travel as one small integer per simulation step: throttle, brake, steer in quarters (-1 .. 1; tilt is analog)
+function packIn(i) { return (i.thr ? 1 : 0) | (i.brk ? 2 : 0) | ((Math.round(clamp(i.steer, -1, 1) * 4) + 4) << 2); }
+function unpackIn(n) { return { thr: n & 1, brk: (n >> 1) & 1, steer: ((n >> 2) - 4) / 4 }; }
+// the host keeps each remote driver's pending inputs in order; a lost message is covered by the next one
+function pushInputs(c, s, a) {
+  const n = Math.min(a.length, 16);
+  for (let k = 0; k < n; k++) {
+    const seq = s - (n - 1 - k), v = a[a.length - n + k];
+    if (seq >= c.nextSeq && Number.isInteger(v) && v >= 0 && v < 36) { c.inq.push({ seq, inp: unpackIn(v) }); c.nextSeq = seq + 1; }
+  }
+}
+function feedInputs(race) {             // once per simulation step, before simTick
+  for (const c of race.cars) {
+    if (!c.remote) continue;
+    const q = c.inq;
+    if (q.length > INPUT_Q) q.splice(0, q.length - 2);        // behind: jump to the newest inputs
+    if (q.length) { const e = q.shift(); c.inp = e.inp; c.ack = e.seq; }   // empty: the last input stays held
+  }
+}
+
+// snapshot of one car: [x, y, a, vx, vy, f, steer, stopT, draft, idx, lap, wait, hit, flags, ack]
+const q3 = (v, k) => Math.round(v * k) / k;
+const SNAP_F = ['x', 'y', 'a', 'vx', 'vy', 'f', 'steer', 'stopT', 'draft', 'idx', 'lap', 'wait', 'hit'];
+function packCar(c) {
+  return [q3(c.x, 100), q3(c.y, 100), q3(c.a, 1e4), q3(c.vx, 100), q3(c.vy, 100), q3(c.f, 100), q3(c.steer, 1000), q3(c.stopT || 0, 100), q3(c.draft, 100),
+    c.idx, c.lap, q3(c.wait || 0, 100), q3(c.hit || 0, 100), (c.off ? 1 : 0) | (c.braking ? 2 : 0), c.ack || 0];
+}
+function unpackInto(c, p, N) {
+  for (let k = 0; k < SNAP_F.length; k++) c[SNAP_F[k]] = p[k];
+  c.off = !!(p[13] & 1); c.braking = !!(p[13] & 2); c.prog = c.lap * N + c.idx;
+}
+// slower data (laps, sectors, penalties, result) goes on the reliable channel when it changes
+function metaOf(c) { return { ls: c.lapStart, lp: c.lapPen, pen: c.pen, last: c.last, best: isFinite(c.best) ? c.best : null, fin: c.fin ? 1 : 0, ft: c.finT, sec: c.sec, cur: c.cur, lsec: c.lastSec, h: c.human ? 1 : 0 }; }
+function applyMeta(c, m) {
+  const num = v => (typeof v === 'number' && isFinite(v) ? v : 0), arr = a => (Array.isArray(a) ? a.filter(v => typeof v === 'number' && isFinite(v)).slice(0, 3) : null);
+  const last = c.last, pen = c.pen;
+  c.lapStart = num(m.ls); c.lapPen = num(m.lp); c.pen = num(m.pen); c.last = num(m.last); c.best = m.best === null ? Infinity : num(m.best);
+  c.fin = !!m.fin; c.finT = num(m.ft); c.sec = clamp(num(m.sec) | 0, 0, 2); c.cur = arr(m.cur) || []; c.lastSec = arr(m.lsec); c.human = !!m.h;
+  if (c.last !== last && c.last > 0) { c.newLap = 1.5; c.lapEvent = true; }
+  if (c.pen > pen) c.limitEvent = true;
+}
+
+function advanceCar(s, T, inp) {         // one simulation step of a car on its own (what simTick does for it)
+  if (s.wait > 0) { s.wait = Math.max(0, s.wait - SIM_H); return; }
+  stepCar(s, T, inp, SIM_H);
+  if (s.hit) s.hit = Math.max(0, s.hit - SIM_H);
+}
+
+// Client-side prediction: the guest steps its own car at once and, on every snapshot, restarts from
+// the host's state and replays the inputs the host has not seen yet. The small leftover jump is
+// smoothed away over a few frames.
+class Predictor {
+  constructor(T, car) { this.T = T; this.s = Object.assign({}, car); this.hist = []; this.seq = 0; this.err = { x: 0, y: 0, a: 0 }; this.primed = false; this.corr = 0; }
+  step(inp) { this.hist.push({ seq: ++this.seq, inp }); advanceCar(this.s, this.T, inp); }
+  auth(p) {
+    const s = this.s, old = { x: s.x + this.err.x, y: s.y + this.err.y, a: s.a + this.err.a };
+    unpackInto(s, p, this.T.N);
+    while (this.hist.length && this.hist[0].seq <= p[14]) this.hist.shift();
+    if (this.hist.length > 240) this.hist.splice(0, this.hist.length - 240);
+    for (const h of this.hist) advanceCar(s, this.T, h.inp);
+    s.spark = null;
+    const dx = old.x - s.x, dy = old.y - s.y, da = angDiff(old.a, s.a);
+    this.corr = Math.hypot(dx, dy);
+    this.err = !this.primed || this.corr > 60 || s.wait > 0 ? { x: 0, y: 0, a: 0 } : { x: dx, y: dy, a: da };
+    this.primed = true;
+  }
+  decay(dt) { const k = Math.exp(-dt / 0.08); this.err.x *= k; this.err.y *= k; this.err.a *= k; }
+}
+
+class HostSession {
+  constructor(code, now) {
+    this.code = code; this.now = now || Date.now; this.peers = new Map(); this.raceNo = 0; this.cfg = null; this.race = null;
+    this.accepting = true; this.step = 0; this.onChange = () => {}; this.onNote = () => {};
+  }
+  tx(p, chan, o) { try { p.send(chan, typeof o === 'string' ? o : JSON.stringify(o)); } catch (e) { /* link gone */ } }
+  sendAll(chan, o) { const s = typeof o === 'string' ? o : JSON.stringify(o); for (const p of this.peers.values()) this.tx(p, chan, s); }
+  list() { return [{ pid: 0, ping: 0 }, ...[...this.peers.values()].map(p => ({ pid: p.pid, ping: p.ping }))]; }
+  changed() { this.sendAll('c', { t: 'players', list: this.list() }); this.onChange(); }
+  join(send) {                                          // a data connection opened: {pid} or {why}
+    if (!this.accepting) return { why: 'RACE IN PROGRESS · TRY AGAIN WHEN IT ENDS' };
+    let pid = 1; while (this.peers.has(pid)) pid++;
+    if (pid >= MAX_HUMANS) return { why: 'THE ROOM IS FULL (8 PLAYERS)' };
+    const p = { pid, send, ping: 0, s: 3, b: 3, seen: this.now() };
+    this.peers.set(pid, p);
+    this.tx(p, 'c', { t: 'welcome', v: PROTO, pid, code: this.code, cfg: this.cfg });
+    this.changed();
+    return { pid };
+  }
+  toAI(c) { c.human = false; c.remote = false; c.auto = true; c.skill = Math.max(c.skill || 0, 0.85); c.inq = []; }
+  drop(pid) {
+    if (!this.peers.delete(pid)) return;
+    const c = this.race && this.race.cars.find(c => c.pid === pid);
+    if (c && c.human) { this.toAI(c); this.onNote(c.name + ' LEFT'); }
+    this.changed();
+  }
+  setCfg(cfg) { this.cfg = cfg; this.sendAll('c', { t: 'cfg', cfg }); }
+  receive(pid, chan, text) {
+    const p = this.peers.get(pid);
+    if (!p || typeof text !== 'string' || text.length > 4096) return;
+    let m; try { m = JSON.parse(text); } catch (e) { return; }
+    if (!m || typeof m !== 'object') return;
+    p.seen = this.now();
+    const car = this.race && this.race.cars.find(c => c.pid === pid && c.remote);
+    const lv = v => clamp(Math.round(+v) || 3, 1, 5);
+    switch (m.t) {
+      case 'hello': case 'lv': p.s = lv(m.s); p.b = lv(m.b); if (car) { car.steerLv = p.s; car.brakeLv = p.b; } break;
+      case 'i': if (car && Array.isArray(m.a) && Number.isInteger(m.s)) pushInputs(car, m.s, m.a); break;
+      case 'rec': if (car) recover(car, this.race.T); break;
+      case 'pong': { const ms = this.now() - m.ts; if (ms >= 0 && ms < 10000) { p.ping = p.ping ? Math.round(p.ping * 0.6 + ms * 0.4) : Math.round(ms); } break; }
+      case 'out': if (car) this.toAI(car); break;           // left the race for the menu, still in the room
+      case 'leave': this.drop(pid); break;
+    }
+  }
+  pingAll() {                                           // every ~2 s: round-trip times, and drop silent peers
+    const t = this.now();
+    for (const p of [...this.peers.values()]) {
+      if (t - p.seen > TIMEOUT_MS) { this.drop(p.pid); continue; }
+      this.tx(p, 'c', { t: 'ping', ts: t });
+    }
+    this.onChange();
+  }
+  startRace(cfg) {
+    this.accepting = false; this.raceNo++;
+    const track = TRACKS.find(t => t.id === cfg.track), pids = [0, ...this.peers.keys()];
+    const rnd = mulberry32(hashSeed(this.code + ':' + this.raceNo));       // the room code is the seed
+    const plan = planField(Math.max(cfg.cars, pids.length), pids, cfg.diff, cfg.grid, rnd), goAt = 4.3 + rnd() * 0.9;
+    const race = makeMpRace(track, cfg, plan, 0);
+    race.mp = { role: 'host', code: this.code };
+    for (const c of race.cars) if (c.human && c.pid !== 0) {
+      const p = this.peers.get(c.pid);
+      c.remote = true; c.steerLv = p.s; c.brakeLv = p.b; c.inq = []; c.nextSeq = 1; c.inp = NEUTRAL; c.ack = 0;
+    }
+    this.cfg = cfg; this.race = race; this.step = 0;
+    this.sendAll('c', { t: 'start', cfg, plan, goAt, n: this.raceNo });
+    return { race, goAt };
+  }
+  endRace() { if (!this.race) return; this.race = null; this.accepting = true; this.sendAll('c', { t: 'end' }); }
+  preStep() { feedInputs(this.race); }
+  postStep() { if (++this.step % SNAP_EVERY === 0) this.snapshot(); }
+  snapshot() {
+    const race = this.race;
+    this.sendAll('g', JSON.stringify({ t: 'S', rt: q3(race.t, 1000), c: race.cars.map(packCar) }));
+    const parts = [];
+    race.cars.forEach((c, i) => { const m = JSON.stringify(metaOf(c)); if (m !== c.metaSig) { c.metaSig = m; parts.push('[' + i + ',' + m + ']'); } });
+    if (parts.length) this.sendAll('c', '{"t":"m","m":[' + parts.join(',') + ']}');
+  }
+}
+
+class GuestSession {
+  constructor(now) {
+    this.now = now || Date.now; this.send = () => {}; this.pid = -1; this.code = ''; this.cfg = null; this.players = []; this.lv = { s: 3, b: 3 };
+    this.race = null; this.pred = null; this.snaps = []; this.inbuf = []; this.lastRx = this.now();
+    this.onWelcome = this.onReject = this.onCfg = this.onPlayers = this.onStart = this.onEnd = this.onBye = () => {};
+  }
+  tx(chan, o) { try { this.send(chan, typeof o === 'string' ? o : JSON.stringify(o)); } catch (e) { /* link gone */ } }
+  ping() { const p = this.players.find(p => p.pid === this.pid); return p ? p.ping : 0; }
+  receive(chan, text) {
+    if (typeof text !== 'string' || text.length > 65536) return;
+    let m; try { m = JSON.parse(text); } catch (e) { return; }
+    if (!m || typeof m !== 'object') return;
+    this.lastRx = this.now();
+    switch (m.t) {
+      case 'welcome': {
+        const cfg = cleanCfg(m.cfg);
+        if (m.v !== PROTO) { this.onReject('THIS HOST RUNS ANOTHER VERSION OF THE GAME'); break; }
+        if (!Number.isInteger(m.pid) || m.pid < 1 || m.pid >= MAX_HUMANS) break;
+        this.pid = m.pid; this.code = String(m.code || ''); this.cfg = cfg;
+        this.tx('c', { t: 'hello', v: PROTO, s: this.lv.s, b: this.lv.b });
+        this.onWelcome(); break;
+      }
+      case 'reject': this.onReject(String(m.why || 'REFUSED').slice(0, 60)); break;
+      case 'cfg': { const cfg = cleanCfg(m.cfg); if (cfg) { this.cfg = cfg; this.onCfg(); } break; }
+      case 'players': if (Array.isArray(m.list)) { this.players = m.list.filter(p => p && Number.isInteger(p.pid) && p.pid >= 0 && p.pid < MAX_HUMANS).map(p => ({ pid: p.pid, ping: +p.ping || 0 })); this.onPlayers(); } break;
+      case 'ping': this.tx('c', { t: 'pong', ts: m.ts }); break;
+      case 'start': this.begin(m); break;
+      case 'end': if (this.race) { this.race = null; this.pred = null; this.onEnd(); } break;
+      case 'bye': this.onBye(); break;
+      case 'S': this.snapshot(m); break;
+      case 'm': this.meta(m); break;
+    }
+  }
+  begin(m) {
+    const cfg = cleanCfg(m.cfg), plan = cleanPlan(m.plan, this.pid), goAt = +m.goAt;
+    if (!cfg || !plan || !(goAt > 0 && goAt < 10)) return;
+    const race = makeMpRace(TRACKS.find(t => t.id === cfg.track), cfg, plan, this.pid);
+    race.mp = { role: 'guest', code: this.code };
+    this.cfg = cfg; this.race = race; this.snaps = []; this.inbuf = []; this.pred = new Predictor(race.T, race.player);
+    this.pred.s.steerLv = this.lv.s; this.pred.s.brakeLv = this.lv.b;
+    this.onStart(race, goAt, cfg);
+  }
+  snapshot(m) {
+    const r = this.race;
+    if (!r || !Array.isArray(m.c) || m.c.length !== r.cars.length || !(m.rt >= 0)) return;
+    for (const p of m.c) if (!Array.isArray(p) || p.length !== 15 || !p.every(Number.isFinite)) return;
+    this.snaps.push({ rt: m.rt, at: this.now() / 1000, c: m.c });
+    if (this.snaps.length > 12) this.snaps.shift();
+    if (!r.player.fin) this.pred.auth(m.c[r.cars.indexOf(r.player)]);
+  }
+  meta(m) {
+    const r = this.race;
+    if (!r || !Array.isArray(m.m)) return;
+    for (const e of m.m) { const c = Array.isArray(e) && r.cars[e[0]]; if (c && e[1] && typeof e[1] === 'object') applyMeta(c, e[1]); }
+  }
+  get driving() { const r = this.race; return !!(r && this.pred && !r.player.fin && this.snaps.length); }
+  stepLocal(inp) {                                      // one simulation step of this player's own car
+    if (!this.driving) return;
+    inp = unpackIn(packIn(inp));                          // step with exactly what the host will get
+    this.pred.step(inp);
+    this.inbuf.push(packIn(inp)); if (this.inbuf.length > 8) this.inbuf.shift();
+    if (this.pred.seq % 2 === 0) this.tx('g', { t: 'i', s: this.pred.seq, a: this.inbuf });
+  }
+  recover() { if (!this.race) return; this.tx('c', { t: 'rec' }); if (recover(this.pred.s, this.race.T)) this.pred.err = { x: 0, y: 0, a: 0 }; }
+  leaveRace() { if (this.race) { this.tx('c', { t: 'out' }); this.race = null; this.pred = null; } }
+  // once per drawn frame: the host's clock, other cars interpolated, own car from the prediction
+  frame(dt) {
+    const r = this.race;
+    if (!r || !this.snaps.length) return;
+    const now = this.now() / 1000, last = this.snaps[this.snaps.length - 1], N = r.T.N;
+    r.t = Math.max(r.t, last.rt + Math.min(0.25, now - last.at));
+    const target = last.rt + (now - last.at) - INTERP;
+    const i1 = this.snaps.findIndex(s => s.rt >= target);
+    const s1 = i1 < 0 ? last : this.snaps[i1], s0 = i1 <= 0 ? s1 : this.snaps[i1 - 1];
+    const u = s1.rt > s0.rt ? clamp((target - s0.rt) / (s1.rt - s0.rt), 0, 1) : 1;
+    const mine = this.driving;
+    r.cars.forEach((c, k) => {
+      const own = c === r.player, hit0 = c.hit || 0;
+      if (own) {                                          // lap data from the newest snapshot, position from the prediction
+        const p = last.c[k]; c.idx = p[9]; c.lap = p[10]; c.prog = c.lap * N + c.idx;
+        if (!mine) unpackInto(c, p, N);
+      } else unpackInto(c, s1.c[k], N);
+      if (!own || !mine) {
+        const a = s0.c[k], b = s1.c[k];
+        c.x = a[0] + (b[0] - a[0]) * u; c.y = a[1] + (b[1] - a[1]) * u; c.a = a[2] + angDiff(b[2], a[2]) * u;
+        c.slip = Math.abs(-c.vx * Math.sin(c.a) + c.vy * Math.cos(c.a));
+        if (c.hit > 0.25 && !(hit0 > 0.25)) c.spark = { x: c.x, y: c.y };
+      }
+      if (c.newLap) c.newLap = Math.max(0, c.newLap - dt);
+    });
+    if (mine) {
+      const s = this.pred.s, e = this.pred.err, c = r.player;
+      this.pred.decay(dt);
+      c.x = s.x + e.x; c.y = s.y + e.y; c.a = s.a + e.a;
+      c.vx = s.vx; c.vy = s.vy; c.f = s.f; c.steer = s.steer; c.off = s.off; c.hit = s.hit; c.wait = s.wait; c.draft = s.draft; c.slip = s.slip; c.braking = s.braking;
+      if (s.spark) { c.spark = s.spark; s.spark = null; }
+    }
+  }
+}
 // ===== CIRCUIT MUSIC: opening phrases in chiptune style =====
 // Notes: NAME+octave/beats (R = rest). bpm = quarter notes per minute, bar = beats per bar
 // (for the bass), pk = pickup beats, tr = transpose in semitones.
@@ -604,16 +1022,24 @@ const sessionRef = {}, sessionSec = {};   // per circuit, this session only: bes
 let skids = [], sparks = [];               // visual effects (world coordinates)
 const keys = {};
 const touch = { l: 0, r: 0, g: 0, b: 0 };
+const tilt = { perm: 'unknown', live: false, angle: 0, zero: 0, steer: 0, t: 0, on: false, n: 0, nNull: 0, flat: false, needZero: false };   // phone as a steering wheel
+let touchOn = false;                       // on-screen controls and phone-friendly panels
+function setTouch(on) { touchOn = on; document.body.classList.toggle('touch', on); }   // the driving buttons themselves show only during a race (see frame)
+const mp = { role: null, state: 'idle', sub: 'choose', err: '', host: null, guest: null, code: '', codeText: '', lastCfg: '' };   // multiplayer: role host | guest
+const initialJoin = hashJoin();            // a #JOIN-CODE link, read before the address is rewritten
 
 // settings live only in the URL (#AUS-L3-N-F-S3-B3-Z7): no browser storage
 function writeHash() {
   opt.track = TRACKS[opt.sel].id;
+  mpPushCfg();
   const code = encodeSettings(opt);
   if (location.hash.replace(/^#/, '') === code) return;
   try { history.replaceState(null, '', '#' + code); }
   catch (e) { try { location.replace('#' + code); } catch (e2) { } }
 }
 addEventListener('hashchange', () => {
+  const jc = hashJoin();
+  if (jc) { if (mode === 'menu') mpJoin(jc); writeHash(); return; }
   const o = decodeSettings(location.hash, TRACKS);
   if (encodeSettings(o) === encodeSettings(opt)) return;
   Object.assign(opt, o); opt.sel = Math.max(0, TRACKS.findIndex(t => t.id === opt.track));
@@ -829,7 +1255,7 @@ function buildMenu() {
     d.className = 'card' + (t.canc ? ' canc' : '');
     d.dataset.i = i;
     d.innerHTML = `<div class="r">${cardLabel(t)}${t.canc ? ' · <b>CANCELLED</b>' : ''}</div><canvas></canvas><div class="n">${t.gp.toUpperCase()}</div><div class="r">${t.c} · ${t.city} · ${t.km.toFixed(3)} KM</div>`;
-    d.onclick = () => { selectTrack(i); };
+    d.onclick = () => { selectTrack(i); if (touchOn) openDetail(); };
     d.ondblclick = () => { selectTrack(i); openDetail(); };
     gridEl.appendChild(d);
   });
@@ -845,6 +1271,7 @@ function refreshMenu() {
   document.getElementById('selname').textContent = `${cardLabel(t)} — ${t.gp.toUpperCase()} — ${t.c.toUpperCase()}${t.canc ? ' (CANCELLED IN 2026)' : ''}   ♪ ${muted ? 'SOUND OFF · V TO TURN ON' : musicOff ? 'MUSIC OFF · T TO TURN ON' : mu.title.toUpperCase()}`;
 }
 function selectTrack(i) {
+  if (guestLocked()) return;
   const prev = opt.sel;
   opt.sel = (i + TRACKS.length) % TRACKS.length; writeHash(); refreshMenu();
   if (opt.sel !== prev) menuMusic();
@@ -852,6 +1279,7 @@ function selectTrack(i) {
   if (detailOpen) openDetail();
 }
 document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => {
+  if (b.dataset.o !== 'cam' && guestLocked()) return;
   opt[b.dataset.o] = ['laps', 'cars', 'limits'].includes(b.dataset.o) ? +b.dataset.v : b.dataset.v; writeHash(); refreshMenu(); if (detailOpen) detailInfo();
 });
 document.getElementById('go').onclick = () => startRace();
@@ -920,6 +1348,8 @@ function gridCols() { const c = cards(); if (c.length < 2) return 1; const top =
 
 // ---------- race flow ----------
 function startRace() {
+  if (mp.role === 'guest') { toast('WAITING FOR THE HOST TO START THE RACE'); return; }
+  if (mp.role === 'host') { startMpRace(); return; }
   audioInit(); if (AC && AC.state === 'suspended') AC.resume();
   musicStop(); clearTimeout(music.wait);
   writeHash();
@@ -936,6 +1366,8 @@ function startRace() {
   menuEl.style.display = 'none';
 }
 function toMenu() {
+  if (mp.host) mp.host.endRace();                        // everyone goes back to the room
+  if (mp.guest) mp.guest.leaveRace();                    // the AI takes over this car
   mode = 'menu'; race = null; closeOverlay();
   menuEl.style.display = 'block';
   if (engG) engG.gain.value = 0;
@@ -943,7 +1375,7 @@ function toMenu() {
 }
 function showPanel(html) { panel.innerHTML = html; panel.style.display = 'block'; }
 function openOverlay(kind, html) {
-  overlay = kind; paused = kind !== 'results'; showPanel(html);
+  overlay = kind; paused = kind !== 'results' && !(race && race.mp); showPanel(html);   // online, the race never pauses
   for (const k in keys) keys[k] = false;
 }
 function closeOverlay() { overlay = null; paused = false; panel.style.display = 'none'; }
@@ -953,25 +1385,30 @@ const SET_ROWS = [
   { k: 'steer', label: 'STEERING', n: 5, note: 'how quickly and how sharply your car turns' },
   { k: 'brake', label: 'BRAKES', n: 5, note: 'braking force of your car' },
   { k: 'zoom', label: 'ZOOM', n: 7, note: '7 = closest view (also + / - while racing)' },
-  { k: 'ghost', label: 'GHOST CAR', n: 1, toggle: true, note: 'your best lap of the session on this circuit, as a dashed outline' }];
+  { k: 'ghost', label: 'GHOST CAR', n: 1, toggle: true, note: 'your best lap of the session on this circuit, as a dashed outline' },
+  { k: 'tilt', label: 'TILT STEERING', n: 1, toggle: true, touch: true, note: 'phones: turn the phone like a wheel to steer, portrait or landscape; gas and brake stay buttons' },
+  { k: 'tiltRange', label: 'TILT RANGE', n: 5, touch: true, note: 'how far you turn for full lock: 1 = 40 degrees, 5 = 16 degrees' }];
+function setRows() { return SET_ROWS.filter(r => !r.touch || touchOn); }
 function settingsHTML() {
-  const rows = SET_ROWS.map((r, i) => {
+  const rows = setRows().map((r, i) => {
     let bar = ''; for (let k = 1; k <= r.n; k++) bar += `<span class="pip${k <= opt[r.k] ? ' on' : ''}"></span>`;
     const val = r.toggle ? (opt[r.k] ? 'ON' : 'OFF') : opt[r.k];
     return `<tr class="${i === settingsRow ? 'cur' : ''}"><td><span class="mk">▶</span>${r.label}</td><td><button data-act="dec" data-k="${r.k}">-</button></td><td class="pips">${bar}</td><td><button data-act="inc" data-k="${r.k}">+</button></td><td>${val}</td></tr><tr class="note"><td></td><td colspan="4">${r.note}</td></tr>`;
   }).join('');
   return `<h2>OPTIONS</h2><div class="sub">STEERING AND BRAKES AFFECT ONLY YOUR CAR · AI CARS FOLLOW THE AI LEVEL</div><table class="set"><colgroup><col style="width:11em"><col style="width:3.5em"><col><col style="width:3.5em"><col style="width:2.5em"></colgroup>${rows}</table>
-  <div class="sub">URL CODE #${encodeSettings(opt)}</div><div class="keys">[↑↓] SELECT &nbsp; [←→] CHANGE &nbsp; [O] [ESC] CLOSE</div>`;
+  ${touchOn && opt.tilt ? `<div class="sub" id="tiltstat">TILT · ${tiltStatus()}</div><div class="btns"><button data-tilt="enable">ENABLE MOTION ACCESS</button><button data-tilt="center">RECENTER</button></div>` : ''}
+  <div class="sub">URL CODE #${encodeSettings(opt)}</div><div class="keys">[↑↓] SELECT &nbsp; [←→] CHANGE &nbsp; [O] [ESC] CLOSE</div>${tb('close')}`;
 }
-function openSettings() { settingsRow = Math.min(settingsRow, SET_ROWS.length - 1); openOverlay('settings', settingsHTML()); }
+function openSettings() { settingsRow = Math.min(settingsRow, setRows().length - 1); openOverlay('settings', settingsHTML()); }
 function changeSetting(k, d) {
   const r = SET_ROWS.find(r => r.k === k);
   opt[k] = clamp(opt[k] + d, r.toggle ? 0 : 1, r.n); writeHash();
+  if (mp.guest && (k === 'steer' || k === 'brake')) { mp.guest.lv = { s: opt.steer, b: opt.brake }; mp.guest.tx('c', { t: 'lv', s: opt.steer, b: opt.brake }); }
   if (overlay === 'settings') panel.innerHTML = settingsHTML();
 }
 panel.addEventListener('click', e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
-  settingsRow = SET_ROWS.findIndex(r => r.k === b.dataset.k);
+  settingsRow = setRows().findIndex(r => r.k === b.dataset.k);
   changeSetting(b.dataset.k, b.dataset.act === 'inc' ? 1 : -1);
 });
 
@@ -982,7 +1419,7 @@ const KEYS_RACE = [['↑ / W', 'THROTTLE'], ['↓ / S', 'BRAKE · HOLD 1 S WHEN 
 const KEYS_MENU = [['← → ↑ ↓', 'SELECT CIRCUIT'], ['ENTER', 'OPEN CIRCUIT BOX / START RACE'], ['ESC', 'BACK TO THE LIST'],
   ['1 3 5 0', 'LAPS 1 / 3 / 5 / 10'], ['2 4 6 8', 'CARS IN THE RACE'], ['G', 'GRID: BACK / RANDOM / POLE'], ['R N P', 'AI ROOKIE / NORMAL / PRO'],
   ['L', 'TRACK LIMITS ON / OFF (+1 S PER OFFENCE)'], ['Q', 'RACE / TIME TRIAL'], ['F / C', 'CAMERA FIXED / CHASE'],
-  ['O', 'OPTIONS'], ['H', 'THIS HELP'], ['T', 'CIRCUIT MUSIC ON / OFF'], ['V', 'ALL SOUND ON / OFF']];
+  ['M', 'MULTIPLAYER: HOST OR JOIN'], ['O', 'OPTIONS'], ['H', 'THIS HELP'], ['T', 'CIRCUIT MUSIC ON / OFF'], ['V', 'ALL SOUND ON / OFF']];
 function gapText(c, lead, i) {
   if (i === 0) return 'LEADER';
   if (c.fin && lead.fin) return '+' + (raceTime(c) - raceTime(lead)).toFixed(3);
@@ -997,21 +1434,21 @@ function helpHTML() {
     const t = TRACKS[opt.sel];
     const keysT = KEYS_MENU.map(([k, v]) => `<tr><td class="k">${k}</td><td>${v}</td></tr>`).join('');
     const row = k => `<tr><td>${k}</td><td></td></tr>`;
-    return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()} · NOT RACING</div>
+    return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()} · NOT RACING · VERSION ${APP_VERSION}</div>
   <div class="cols"><div><h3>KEYS</h3><table>${keysT}</table></div>
   <div><h3>STATUS</h3><table>${['LAP', 'POSITION', 'RACE TIME', 'YOUR LAST', 'YOUR BEST', 'FASTEST LAP'].map(row).join('')}
    <tr><td>OPTIONS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
    <tr><td>RACE</td><td>${opt.mode === 'TT' ? 'TIME TRIAL' : opt.laps + ' LAP' + (opt.laps > 1 ? 'S' : '') + ' · ' + opt.cars + ' CARS · GRID ' + opt.grid + ' · ' + opt.diff} · ${opt.cam}${opt.limits ? ' · TRACK LIMITS' : ''}</td></tr></table>
   <h3>LEADERBOARD</h3><table><tr><th>POS</th><th>DRIVER</th><th>GAP</th><th>LAST</th><th>BEST</th></tr></table></div></div>
-  <div class="keys">[H] [ESC] CLOSE</div>`;
+  <div class="keys">[H] [ESC] CLOSE</div>${tb('close')}`;
   }
   const P = race.player, st = standings(race.cars);
   const fastest = Math.min(...race.cars.map(c => c.best));
   const fastCar = race.cars.find(c => c.best === fastest);
   const keysT = KEYS_RACE.map(([k, v]) => `<tr><td class="k">${k}</td><td>${v}</td></tr>`).join('');
-  const lb = st.map((c, i) => `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${c.isP ? 'YOU' : 'CAR ' + c.num}</td><td>${gapText(c, st[0], i)}</td><td>${fmt(c.last)}</td><td>${fmt(c.best)}</td></tr>`).join('');
+  const lb = st.map((c, i) => `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${carName(c)}</td><td>${gapText(c, st[0], i)}</td><td>${fmt(c.last)}</td><td>${fmt(c.best)}</td></tr>`).join('');
   const t = race.track, lapShown = race.tt ? Math.max(1, P.lap) : clamp(Math.max(1, P.lap), 1, race.laps);
-  return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()}</div>
+  return `<h2>HELP</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()} · VERSION ${APP_VERSION}</div>
   <div class="cols"><div><h3>KEYS</h3><table>${keysT}</table></div>
   <div><h3>STATUS</h3><table>
    <tr><td>LAP</td><td>${race.tt ? Math.max(1, P.lap) + ' · TIME TRIAL' : lapShown + ' / ' + race.laps}</td></tr>
@@ -1020,14 +1457,18 @@ function helpHTML() {
    <tr><td>RACE TIME</td><td>${fmt(P.fin ? P.finT : race.t)}</td></tr>
    <tr><td>YOUR LAST</td><td>${fmt(P.last)}</td></tr>
    <tr><td>YOUR BEST</td><td>${fmt(P.best)}</td></tr>
-   <tr><td>FASTEST LAP</td><td>${isFinite(fastest) ? fmt(fastest) + ' · ' + (fastCar.isP ? 'YOU' : 'CAR ' + fastCar.num) : '-:--.---'}</td></tr>
+   <tr><td>FASTEST LAP</td><td>${isFinite(fastest) ? fmt(fastest) + ' · ' + carName(fastCar) : '-:--.---'}</td></tr>
    <tr><td>OPTIONS</td><td>STEER ${opt.steer} · BRAKES ${opt.brake} · ZOOM ${opt.zoom}</td></tr>
    <tr><td>RACE</td><td>${race.tt ? 'TIME TRIAL' : opt.diff + ' · ' + race.cars.length + ' CARS'} · ${opt.cam}</td></tr></table>
   <h3>LEADERBOARD</h3><table><tr><th>POS</th><th>DRIVER</th><th>GAP</th><th>LAST</th><th>BEST</th></tr>${lb}</table></div></div>
-  <div class="keys">[H] [ESC] CLOSE</div>`;
+  <div class="keys">[H] [ESC] CLOSE</div>${tb('close')}`;
 }
 function tryRecover() {
   if (!race || mode !== 'race' || paused) return;
+  if (race.mp && race.mp.role === 'guest' && mp.guest) {
+    if (canRecover(race.player, race.T)) { mp.guest.recover(); beep(330, 0.12); } else if (!race.player.wait) flash('ON TRACK · SPACE ONLY WHEN OFF TRACK OR FACING BACKWARDS');
+    return;
+  }
   if (recover(race.player, race.T)) beep(330, 0.12); else if (!race.player.wait) flash('ON TRACK · SPACE ONLY WHEN OFF TRACK OR FACING BACKWARDS');
 }
 function resultsHTML() {
@@ -1037,12 +1478,329 @@ function resultsHTML() {
     let tm;
     if (c.fin) tm = i === 0 ? fmt(raceTime(c)) : '+' + (raceTime(c) - raceTime(lead)).toFixed(3);
     else { const lapsDown = Math.floor((lead.prog - c.prog) / race.T.N); tm = lapsDown >= 1 ? `+${lapsDown} LAP${lapsDown > 1 ? 'S' : ''}` : 'RUNNING'; }
-    return `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${c.isP ? 'YOU' : 'CAR ' + c.num}</td><td>${tm}</td><td>${c.pen ? '+' + c.pen + ' S' : ''}</td><td>${fmt(c.best)}</td></tr>`;
+    return `<tr class="${c.isP ? 'me' : ''}"><td>P${i + 1}</td><td>${carName(c)}</td><td>${tm}</td><td>${c.pen ? '+' + c.pen + ' S' : ''}</td><td>${fmt(c.best)}</td></tr>`;
   }).join('');
   const pos = st.indexOf(P) + 1;
   return `<h2>${pos === 1 ? 'VICTORY' : 'FINISHED P' + pos}</h2><div class="sub">${race.track.gp.toUpperCase()} · ${race.laps} LAP${race.laps > 1 ? 'S' : ''} · ${opt.diff}</div>
   <table><tr><th>POS</th><th>DRIVER</th><th>TIME</th><th>PEN</th><th>BEST LAP</th></tr>${rows}</table>
-  <div class="keys">[R] RESTART &nbsp; [ESC] MENU</div>`;
+  <div class="keys">${resultsKeys(st)}</div>${tb(race.mp ? (race.mp.role === 'host' ? 'resultsHost' : 'resultsGuest') : 'results')}`;
+}
+function resultsKeys(st) {
+  if (!race.mp) return '[R] RESTART &nbsp; [ESC] MENU';
+  const running = st.filter(c => c.human && !c.fin && !c.isP).length;
+  return race.mp.role === 'host'
+    ? `[R] RACE AGAIN &nbsp; [ESC] MENU${running ? ` · ENDS THE RACE FOR ${running} PLAYER${running > 1 ? 'S' : ''} STILL RACING` : ''}`
+    : '[ESC] MENU · THE HOST STARTS THE NEXT RACE';
+}
+
+// ---------- multiplayer: lobby panel, matchmaking through the public PeerJS broker, WebRTC data channels ----------
+// The broker (0.peerjs.com) only relays the handshake that connects two browsers. Race data then
+// goes straight between them, host to guests, over WebRTC data channels.
+let SIGNAL_URL = 'wss://0.peerjs.com/peerjs?key=peerjs';
+const RTC_CFG = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] };
+const net = { broker: null, token: '', pcs: new Map(), gpc: null, tries: 0, timer: 0 };
+const secureRnd = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
+const randId = () => Array.from({ length: 12 }, () => CODE_CHARS[Math.floor(secureRnd() * CODE_CHARS.length)]).join('');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let toastTimer = 0;
+function toast(m) {
+  const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block';
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2800);
+}
+function copyText(s) {
+  const ok = () => toast('COPIED'), bad = () => toast('COULD NOT COPY · SELECT IT AND COPY BY HAND');
+  try { navigator.clipboard.writeText(s).then(ok, bad); } catch (e) { bad(); }
+}
+function joinLink(code) { return location.href.split('#')[0] + '#JOIN-' + code; }
+function curCfg() { return { track: TRACKS[opt.sel].id, laps: opt.laps, diff: opt.diff, cars: opt.cars, grid: opt.grid, limits: opt.limits ? 1 : 0 }; }
+function mpPushCfg() {                                 // the host's race options follow the menu
+  if (mp.role !== 'host' || !mp.host) return;
+  const c = curCfg(), s = JSON.stringify(c);
+  if (s !== mp.lastCfg) { mp.lastCfg = s; mp.host.setCfg(c); }
+}
+function applyCfg(cfg) {                               // a guest takes the host's race options
+  if (!cfg) return;
+  const i = TRACKS.findIndex(t => t.id === cfg.track), prev = opt.sel;
+  Object.assign(opt, { laps: cfg.laps, diff: cfg.diff, cars: cfg.cars, grid: cfg.grid, limits: cfg.limits, mode: 'RACE', sel: i });
+  writeHash();
+  if (mode === 'menu') { refreshMenu(); if (i !== prev) menuMusic(); if (detailOpen) openDetail(); const c = cards()[i]; if (c) c.scrollIntoView({ block: 'nearest' }); }
+}
+function guestLocked() {
+  if (mp.role !== 'guest') return false;
+  toast('THE HOST CHOOSES THE CIRCUIT AND THE RACE OPTIONS'); return true;
+}
+
+// ----- the lobby panel -----
+function mpView() {
+  if (mp.state === 'error') return 'error';
+  if (mp.role === null) return mp.sub === 'join' ? 'join' : 'choose';
+  return mp.state === 'connecting' ? 'connecting' : mp.role;
+}
+function raceLine(cfg) {
+  const t = TRACKS.find(t => t.id === cfg.track);
+  return `${t.gp.toUpperCase()} · ${cfg.laps} LAP${cfg.laps > 1 ? 'S' : ''} · ${cfg.cars} CARS · ${cfg.diff} AI`;
+}
+function playersHTML(list, me) {
+  return '<table><tr><th>PLAYER</th><th>PING</th></tr>' + list.map(p =>
+    `<tr class="${p.pid === me ? 'me' : ''}"><td>P${p.pid + 1}${p.pid === 0 ? ' · HOST' : ''}${p.pid === me ? ' · YOU' : ''}</td><td>${p.pid === 0 ? '—' : p.ping ? p.ping + ' MS' : '…'}</td></tr>`).join('') + '</table>';
+}
+function mpHTML() {
+  const v = mpView();
+  if (v === 'choose') return `<h2>MULTIPLAYER</h2><div class="sub">RACE FRIENDS ONLINE · ONE PLAYER HOSTS AND SHARES A CODE · UP TO 8 CARS</div>
+    <div class="btns"><button class="go" data-mp="host">HOST A GAME [H]</button><button class="go" data-mp="join">JOIN WITH A CODE [J]</button><button data-mp="close">CLOSE [ESC]</button></div>
+    <div class="sub">THE HOST PICKS THE CIRCUIT AND OPTIONS · FREE PLACES ARE FILLED BY AI CARS</div>`;
+  if (v === 'join') return `<h2>JOIN A GAME</h2><div class="sub">TYPE THE CODE THE HOST SHARED</div>
+    <input id="mpcode" maxlength="8" placeholder="ABC-DEF" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(mp.codeText || '')}">
+    <div class="btns"><button class="go" data-mp="go">JOIN ▶ [ENTER]</button><button data-mp="back">BACK [ESC]</button></div>`;
+  if (v === 'connecting') return `<h2>${mp.role === 'host' ? 'OPENING THE ROOM' : 'JOINING ' + showCode(mp.code)}</h2><div class="sub">CONNECTING …</div><div class="btns"><button data-mp="stop">CANCEL [ESC]</button></div>`;
+  if (v === 'error') return `<h2>MULTIPLAYER</h2><div class="err">${esc(mp.err)}</div><div class="btns"><button data-mp="stop">OK [ESC]</button></div>`;
+  if (v === 'host') {
+    const h = mp.host, n = h.peers.size;
+    return `<h2>HOSTING</h2><div class="sub">${mp.state === 'ready' ? 'SHARE THIS CODE · PLAYERS JOIN WITH IT' : 'RECONNECTING TO THE MATCHMAKER · NEW PLAYERS CANNOT JOIN YET'}</div>
+    <div class="code">${showCode(h.code)}</div><div class="link">${esc(joinLink(h.code))}</div>${playersHTML(h.list(), 0)}
+    <div class="sub">${raceLine(curCfg())} · CHANGE IT IN THE MENU</div>
+    <div class="btns"><button data-mp="copycode">COPY CODE</button><button data-mp="copylink">COPY LINK</button><button class="go${n ? '' : ' off'}" data-mp="start">START RACE ▶ [ENTER]</button></div>
+    <div class="btns"><button data-mp="close">CLOSE [ESC]</button><button data-mp="stop">STOP HOSTING</button></div>${n ? '' : '<div class="sub">WAITING FOR PLAYERS …</div>'}`;
+  }
+  const g = mp.guest;
+  return `<h2>ROOM ${showCode(mp.code)}</h2><div class="sub">YOU ARE P${g.pid + 1} · PING ${g.ping() || '…'} MS</div>
+    ${playersHTML(g.players.length ? g.players : [{ pid: 0, ping: 0 }, { pid: g.pid, ping: 0 }], g.pid)}
+    <div class="sub">${g.cfg ? raceLine(g.cfg) : ''}</div><div class="sub">WAITING FOR THE HOST TO START THE RACE</div>
+    <div class="btns"><button data-mp="close">CLOSE [ESC]</button><button data-mp="stop">LEAVE ROOM</button></div>`;
+}
+function mpRefresh() {
+  const b = document.getElementById('mpbtn');
+  b.textContent = mp.role === 'host' && mp.host ? `HOSTING ${showCode(mp.host.code)} · ${mp.host.peers.size + 1}` : mp.role === 'guest' ? `ROOM ${showCode(mp.code)}` : 'MULTIPLAYER';
+  b.classList.toggle('on', !!mp.role);
+  if (overlay === 'mp') { panel.innerHTML = mpHTML(); const i = panel.querySelector('input'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
+}
+function openMp() {
+  if (mode !== 'menu') return;
+  mp.sub = 'choose'; settingsFromPause = false; openOverlay('mp', mpHTML());
+  const i = panel.querySelector('input'); if (i) i.focus();
+}
+function mpAct(a) {
+  const i = panel.querySelector('#mpcode'); if (i) mp.codeText = i.value;
+  switch (a) {
+    case 'host': hostStart(); break;
+    case 'join': mp.sub = 'join'; mp.codeText = ''; break;
+    case 'back': mp.sub = 'choose'; break;
+    case 'go': { const code = normCode(mp.codeText); if (!code) { toast('NOT A VALID CODE · 6 LETTERS AND DIGITS'); return; } mpJoin(code); return; }
+    case 'copycode': if (mp.host) copyText(showCode(mp.host.code)); return;
+    case 'copylink': if (mp.host) copyText(joinLink(mp.host.code)); return;
+    case 'start': startRace(); return;
+    case 'close': closeOverlay(); return;
+    case 'stop': mpStop(); return;
+  }
+  mpRefresh();
+}
+function mpKeys(e) {
+  const v = mpView();
+  if (e.code === 'Escape' || (e.code === 'KeyM' && v !== 'join')) {
+    if (v === 'join') mpAct('back'); else if (v === 'connecting' || v === 'error') mpAct('stop'); else closeOverlay();
+    return true;
+  }
+  if (v === 'choose' && e.code === 'KeyH') { mpAct('host'); return true; }
+  if (v === 'choose' && e.code === 'KeyJ') { mpAct('join'); return true; }
+  if (v === 'join' && e.code === 'Enter') { mpAct('go'); return true; }
+  if (v === 'host' && e.code === 'Enter') { mpAct('start'); return true; }
+  return true;
+}
+panel.addEventListener('click', e => { const b = e.target.closest('button[data-mp]'); if (b) mpAct(b.dataset.mp); });
+panel.addEventListener('input', e => { if (e.target.id === 'mpcode') mp.codeText = e.target.value; });
+document.getElementById('mpbtn').onclick = () => openMp();
+document.getElementById('dmp').onclick = () => openMp();
+
+// ----- session control -----
+function mpTeardown(delay) {                           // close the broker and the peer connections (after `delay` ms, so a goodbye gets out)
+  clearTimeout(net.timer);
+  const old = [net.broker, ...[...net.pcs.values()].map(s => s.pc), net.gpc];
+  net.broker = null; net.gpc = null; net.pcs = new Map();
+  const close = () => { for (const x of old) try { if (x) x.close(); } catch (e) { /* already closed */ } };
+  if (delay) setTimeout(close, delay); else close();
+  mp.role = null; mp.state = 'idle'; mp.host = null; mp.guest = null; mp.lastCfg = '';
+}
+function mpStop(note) {                                // stop hosting or leave the room
+  const hadRace = race && race.mp;
+  if (hadRace) toMenu();
+  if (mp.host) mp.host.sendAll('c', { t: 'bye' });
+  if (mp.guest) mp.guest.tx('c', { t: 'leave' });
+  mpTeardown(300);
+  mp.sub = 'choose';
+  if (note) toast(note);
+  refreshMenu(); mpRefresh();
+}
+function mpFail(why) {                                 // connection failed: show it in the panel
+  mpTeardown(0);
+  mp.state = 'error'; mp.err = why;
+  if (overlay !== 'mp') openOverlay('mp', '');
+  mpRefresh();
+}
+function mpOpenPanel() { if (overlay !== 'mp') openOverlay('mp', ''); }
+function mpTick() {                                    // every 2 s: pings, and watch for a silent host
+  if (mp.host && mp.state !== 'connecting') mp.host.pingAll();
+  const g = mp.guest;
+  if (g && mp.state === 'ready' && g.now() - g.lastRx > TIMEOUT_MS) mpStop('THE HOST STOPPED RESPONDING');
+}
+setInterval(mpTick, 2000);
+addEventListener('pagehide', () => { if (mp.host) mp.host.sendAll('c', { t: 'bye' }); if (mp.guest) mp.guest.tx('c', { t: 'leave' }); });
+
+function openBroker(id, token, on) {                   // WebSocket to the matchmaking broker
+  let ws, hb = 0, opened = false, dead = false;
+  const b = { send(m) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(m)); }, close() { dead = true; clearInterval(hb); try { ws.close(); } catch (e) { /* closed */ } } };
+  try { ws = new WebSocket(`${SIGNAL_URL}&id=${encodeURIComponent(id)}&token=${token}`); } catch (e) { setTimeout(() => on({ type: 'CLOSE', opened: false }), 0); return b; }
+  ws.onmessage = e => {
+    let m; try { m = JSON.parse(e.data); } catch (x) { return; }
+    if (!m || typeof m !== 'object') return;
+    if (m.type === 'OPEN') { opened = true; hb = setInterval(() => b.send({ type: 'HEARTBEAT' }), 5000); }
+    on(m);
+  };
+  ws.onclose = () => { clearInterval(hb); if (!dead) on({ type: 'CLOSE', opened }); };
+  ws.onerror = () => {};
+  return b;
+}
+function makeLink(pc, ch) {
+  return {
+    send(chan, text) { const d = ch[chan]; if (!d || d.readyState !== 'open' || (chan === 'g' && d.bufferedAmount > 65536)) return; try { d.send(text); } catch (e) { /* closing */ } },
+    close() { try { pc.close(); } catch (e) { /* closed */ } }
+  };
+}
+
+// ----- host: wait for offers, answer them -----
+function hostStart() {
+  if (typeof RTCPeerConnection === 'undefined') { mpFail('THIS BROWSER HAS NO WEBRTC'); return; }
+  mpTeardown(0);
+  const sess = new HostSession(newCode(secureRnd));
+  sess.onChange = () => mpRefresh();
+  sess.onNote = n => { if (race) flash(n); else toast(n); };
+  Object.assign(mp, { role: 'host', state: 'connecting', err: '', host: sess, code: sess.code });
+  net.token = randId(); net.tries = 0;
+  mpPushCfg(); brokerOpen(); mpRefresh();
+}
+function brokerOpen() {
+  const sess = mp.host;
+  net.broker = openBroker('vgp-' + sess.code, net.token, m => {
+    if (mp.host !== sess) return;
+    switch (m.type) {
+      case 'OPEN': mp.state = 'ready'; mp.code = sess.code; mpRefresh(); break;
+      case 'ID-TAKEN':
+        if (++net.tries < 6) { net.broker.close(); sess.code = newCode(secureRnd); brokerOpen(); } else mpFail('COULD NOT GET A FREE CODE · TRY AGAIN');
+        break;
+      case 'OFFER': hostOffer(m.src, m.payload); break;
+      case 'CANDIDATE': hostCandidate(m.src, m.payload); break;
+      case 'CLOSE':
+        if (!m.opened && mp.state === 'connecting') { mpFail('CANNOT REACH THE MATCHMAKING SERVER · CHECK YOUR CONNECTION'); break; }
+        mp.state = 'reconnecting'; mpRefresh();      // players already connected keep playing; retry for new ones
+        setTimeout(() => { if (mp.host === sess && mp.state === 'reconnecting') brokerOpen(); }, 3000);
+        break;
+    }
+  });
+}
+function hostOffer(src, pl) {
+  const sess = mp.host;
+  if (!pl || !pl.sdp || pl.sdp.type !== 'offer' || typeof pl.sdp.sdp !== 'string' || typeof src !== 'string' || net.pcs.size >= 16) return;
+  if (net.pcs.has(src)) { try { net.pcs.get(src).pc.close(); } catch (e) { /* replaced */ } net.pcs.delete(src); }
+  const pc = new RTCPeerConnection(RTC_CFG), ch = {}, st = { pc, queue: [], ready: false, pid: -1 }, connId = String(pl.connectionId || 'dc_0').slice(0, 40);
+  net.pcs.set(src, st);
+  const gone = () => { if (st.pid >= 0) { sess.drop(st.pid); st.pid = -1; } if (net.pcs.get(src) === st) net.pcs.delete(src); try { pc.close(); } catch (e) { /* closed */ } };
+  pc.onicecandidate = e => { if (e.candidate && net.broker) net.broker.send({ type: 'CANDIDATE', dst: src, payload: { candidate: e.candidate, type: 'data', connectionId: connId } }); };
+  pc.onconnectionstatechange = () => { if (pc.connectionState === 'failed' || pc.connectionState === 'closed') gone(); };
+  pc.ondatachannel = e => {
+    const d = e.channel; ch[d.label] = d;
+    d.onmessage = m => { if (st.pid >= 0) sess.receive(st.pid, d.label, m.data); };
+    d.onclose = gone;
+    d.onopen = () => {
+      if (st.pid >= 0 || !ch.c || !ch.g || ch.c.readyState !== 'open' || ch.g.readyState !== 'open') return;
+      const link = makeLink(pc, ch), r = sess.join(link.send);
+      if (r.why) { link.send('c', JSON.stringify({ t: 'reject', why: r.why })); setTimeout(() => link.close(), 500); return; }
+      st.pid = r.pid;
+    };
+  };
+  pc.setRemoteDescription(pl.sdp)
+    .then(() => { st.ready = true; st.queue.forEach(c => pc.addIceCandidate(c).catch(() => {})); return pc.createAnswer(); })
+    .then(a => pc.setLocalDescription(a))
+    .then(() => { if (net.broker) net.broker.send({ type: 'ANSWER', dst: src, payload: { sdp: pc.localDescription, type: 'data', connectionId: connId, browser: 'chrome' } }); })
+    .catch(gone);
+  setTimeout(() => { if (st.pid < 0 && net.pcs.get(src) === st) gone(); }, 25000);
+}
+function hostCandidate(src, pl) {
+  const st = net.pcs.get(src);
+  if (!st || !pl || !pl.candidate) return;
+  if (st.ready) st.pc.addIceCandidate(pl.candidate).catch(() => {}); else st.queue.push(pl.candidate);
+}
+
+// ----- guest: send an offer to the host's code, wait for its answer -----
+function mpJoin(code) {
+  if (mode !== 'menu') return;
+  if (typeof RTCPeerConnection === 'undefined') { mpFail('THIS BROWSER HAS NO WEBRTC'); return; }
+  mpTeardown(0);
+  const gs = new GuestSession();
+  gs.lv = { s: opt.steer, b: opt.brake };
+  Object.assign(mp, { role: 'guest', state: 'connecting', err: '', guest: gs, code });
+  gs.onWelcome = () => { mp.state = 'ready'; applyCfg(gs.cfg); mpRefresh(); toast('JOINED ROOM ' + showCode(code)); };
+  gs.onReject = why => { if (mp.guest === gs) mpFail(why); };
+  gs.onCfg = () => { applyCfg(gs.cfg); mpRefresh(); };
+  gs.onPlayers = () => mpRefresh();
+  gs.onStart = (r, g, cfg) => { applyCfg(cfg); enterMpRace(r, g); };
+  gs.onEnd = () => { if (race && race.mp) { toast('THE HOST ENDED THE RACE'); toMenu(); } };
+  gs.onBye = () => { if (mp.guest === gs) mpStop('THE HOST CLOSED THE ROOM'); };
+  mpOpenPanel(); mpRefresh();
+  const hostId = 'vgp-' + code, token = randId();
+  let pc = null, offered = false, answered = false, linked = false, queue = [];
+  const connId = 'dc_' + randId();   // the broker wants PeerJS-shaped payloads: type, connectionId, and for offers label, reliable, serialization, browser
+  const fail = why => { if (mp.guest === gs && !linked) mpFail(why); };
+  net.timer = setTimeout(() => fail('NO ANSWER FROM THE HOST · CHECK THE CODE · STRICT FIREWALLS CAN BLOCK DIRECT CONNECTIONS'), 25000);
+  const broker = openBroker('vgpg-' + randId(), token, m => {
+    if (mp.guest !== gs) return;
+    if (m.type === 'OPEN') startOffer();
+    else if (m.type === 'ANSWER' && m.src === hostId && pc && m.payload && m.payload.sdp) {
+      answered = true;
+      pc.setRemoteDescription(m.payload.sdp).then(() => { queue.forEach(c => pc.addIceCandidate(c).catch(() => {})); queue = []; }).catch(() => fail('THE HOST ANSWERED BADLY · TRY AGAIN'));
+    } else if (m.type === 'CANDIDATE' && m.src === hostId && m.payload && m.payload.candidate) {
+      if (answered && pc.remoteDescription) pc.addIceCandidate(m.payload.candidate).catch(() => {}); else queue.push(m.payload.candidate);
+    } else if (m.type === 'EXPIRE' || m.type === 'LEAVE') fail('NO HOST WITH THAT CODE');
+    else if (m.type === 'CLOSE' && !answered && !linked) fail(offered ? 'NO HOST WITH THAT CODE' : 'CANNOT REACH THE MATCHMAKING SERVER · CHECK YOUR CONNECTION');
+  });
+  net.broker = broker;
+  function startOffer() {
+    pc = new RTCPeerConnection(RTC_CFG); net.gpc = pc;
+    const ch = { c: pc.createDataChannel('c'), g: pc.createDataChannel('g', { ordered: true, maxRetransmits: 0 }) };
+    const lost = () => { if (mp.guest === gs && linked) mpStop('CONNECTION TO THE HOST LOST'); };
+    pc.onicecandidate = e => { if (e.candidate) broker.send({ type: 'CANDIDATE', dst: hostId, payload: { candidate: e.candidate, type: 'data', connectionId: connId } }); };
+    pc.onconnectionstatechange = () => { if (pc.connectionState === 'failed' || pc.connectionState === 'closed') { if (linked) lost(); else fail('COULD NOT CONNECT TO THE HOST · A STRICT FIREWALL MAY BLOCK DIRECT CONNECTIONS'); } };
+    ch.c.onmessage = e => gs.receive('c', e.data); ch.g.onmessage = e => gs.receive('g', e.data);
+    ch.c.onclose = lost;
+    const opened = () => {
+      if (linked || ch.c.readyState !== 'open' || ch.g.readyState !== 'open') return;
+      linked = true; clearTimeout(net.timer); broker.close(); net.broker = null;
+      gs.send = makeLink(pc, ch).send;
+    };
+    ch.c.onopen = opened; ch.g.onopen = opened;
+    pc.createOffer().then(o => pc.setLocalDescription(o))
+      .then(() => { offered = true; broker.send({ type: 'OFFER', dst: hostId, payload: { sdp: pc.localDescription, type: 'data', label: 'vgp', connectionId: connId, reliable: true, serialization: 'json', browser: 'chrome' } }); })
+      .catch(() => fail('COULD NOT START THE CONNECTION'));
+  }
+}
+function hashJoin() { const m = /^#?JOIN-([A-Z0-9-]{6,8})$/i.exec(location.hash); return m ? normCode(m[1]) : null; }
+
+// ----- starting and ending a multiplayer race -----
+function startMpRace() {
+  const sess = mp.host;
+  if (!sess || !sess.peers.size) { toast('WAITING FOR PLAYERS · SHARE THE CODE'); if (mode === 'menu') { openMp(); } return; }
+  if (opt.mode === 'TT') { opt.mode = 'RACE'; toast('MULTIPLAYER IS A RACE · TIME TRIAL IS OFF'); }
+  audioInit(); if (AC && AC.state === 'suspended') AC.resume();
+  musicStop(); clearTimeout(music.wait);
+  writeHash();
+  const { race: r, goAt: g } = sess.startRace(curCfg());
+  enterMpRace(r, g);
+}
+function enterMpRace(r, g) {
+  musicStop(); clearTimeout(music.wait);
+  race = r; const P = r.player;
+  camX = P.x; camY = P.y; skids = []; sparks = []; gear = 1; acc = 0;
+  mode = 'lights'; lightsT = 0; goAt = g;
+  closeOverlay(); closeDetail(); zoomCur = opt.zoom;
+  menuEl.style.display = 'none';
 }
 
 // ---------- input ----------
@@ -1055,16 +1813,44 @@ function ttSummaryHTML() {
   return `<h2>TIME TRIAL</h2><div class="sub">${t.gp.toUpperCase()} · ${t.c.toUpperCase()} · ${laps.length} LAP${laps.length === 1 ? '' : 'S'}${race.limits ? ' · TRACK LIMITS' : ''}</div>
   <table><tr><th>LAP</th><th>TIME</th><th>S1</th><th>S2</th><th>S3</th><th>PEN</th></tr>${rows || '<tr><td colspan="6">NO COMPLETE LAP</td></tr>'}</table>
   <div class="sub">SESSION BEST ${sessionRef[t.id] ? fmt(sessionRef[t.id].time) : '-:--.---'} · BEST SECTORS ${bs.length === 3 ? bs.map(s => s.toFixed(3)).join(' / ') : '—'} · IDEAL LAP ${ideal}</div>
-  <div class="keys">[R] NEW RUN &nbsp; [ESC] MENU</div>`;
+  <div class="keys">[R] NEW RUN &nbsp; [ESC] MENU</div>${tb('summary')}`;
 }
 const GAMEKEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
 const PAUSE_HTML = '<h2>PAUSED</h2><div class="keys">[P] RESUME &nbsp; [H] HELP &nbsp; [O] OPTIONS &nbsp; [R] RESTART &nbsp; [ESC] MENU</div>';
+// on-screen buttons for the boxes that otherwise list keys (touch screens)
+function tb(kind) {
+  if (!touchOn) return '';
+  const cam = opt.cam === 'FIXED' ? ['CAMERA: FIXED', 'KeyC'] : ['CAMERA: CHASE', 'KeyF'], rc = tiltActive() ? [['RECENTER TILT', 'KeyZ']] : [];
+  const L = {
+    close: [['CLOSE', 'Escape']],
+    pause: [['RESUME', 'KeyP'], ['HELP', 'KeyH'], ['OPTIONS', 'KeyO'], cam, ...rc, ['RESTART', 'KeyR'], ['MENU', 'Escape']],
+    pauseHost: [['CLOSE', 'KeyP'], ['HELP', 'KeyH'], ['OPTIONS', 'KeyO'], cam, ...rc, ['RESTART FOR ALL', 'KeyR'], ['END RACE FOR ALL', 'Escape']],
+    pauseGuest: [['CLOSE', 'KeyP'], ['HELP', 'KeyH'], ['OPTIONS', 'KeyO'], cam, ...rc, ['LEAVE RACE', 'Escape']],
+    results: [['RESTART', 'KeyR'], ['MENU', 'Escape']],
+    resultsHost: [['RACE AGAIN', 'KeyR'], ['MENU', 'Escape']],
+    resultsGuest: [['MENU', 'Escape']],
+    summary: [['NEW RUN', 'KeyR'], ['MENU', 'Escape']]
+  }[kind];
+  return '<div class="btns">' + L.map(([l, k]) => `<button data-key="${k}">${l}</button>`).join('') + '</div>';
+}
+panel.addEventListener('click', e => {
+  const t = e.target.closest('button[data-tilt]');
+  if (t) { if (t.dataset.tilt === 'enable') { if (tilt.perm === 'denied' || tilt.perm === 'asking') tilt.perm = 'unknown'; tiltEnsure(); } else tiltRecenter(); return; }
+  const b = e.target.closest('button[data-key]');
+  if (b) dispatchEvent(new KeyboardEvent('keydown', { code: b.dataset.key, key: b.dataset.key }));
+});
+function pauseHTML() {
+  if (!race.mp) return PAUSE_HTML + tb('pause');
+  const host = race.mp.role === 'host';
+  return `<h2>ONLINE</h2><div class="sub">THE RACE KEEPS RUNNING · NO PAUSE ONLINE</div><div class="keys">${host ? '[R] RESTART FOR ALL &nbsp; [ESC] END THE RACE FOR ALL' : '[ESC] LEAVE THE RACE · AN AI TAKES YOUR CAR'} &nbsp; [H] HELP &nbsp; [O] OPTIONS &nbsp; [P] CLOSE</div>${tb(host ? 'pauseHost' : 'pauseGuest')}`;
+}
 function settingsKeys(e) {
-  if (e.code === 'ArrowUp') settingsRow = (settingsRow + SET_ROWS.length - 1) % SET_ROWS.length;
-  else if (e.code === 'ArrowDown') settingsRow = (settingsRow + 1) % SET_ROWS.length;
-  else if (e.code === 'ArrowLeft' || e.key === '-') changeSetting(SET_ROWS[settingsRow].k, -1);
-  else if (e.code === 'ArrowRight' || e.key === '+') changeSetting(SET_ROWS[settingsRow].k, 1);
-  else if (e.code === 'Escape' || e.code === 'KeyO') { closeOverlay(); if (race && settingsFromPause) openOverlay('pause', PAUSE_HTML); return true; }
+  const rows = setRows();
+  if (e.code === 'ArrowUp') settingsRow = (settingsRow + rows.length - 1) % rows.length;
+  else if (e.code === 'ArrowDown') settingsRow = (settingsRow + 1) % rows.length;
+  else if (e.code === 'ArrowLeft' || e.key === '-') changeSetting(rows[settingsRow].k, -1);
+  else if (e.code === 'ArrowRight' || e.key === '+') changeSetting(rows[settingsRow].k, 1);
+  else if (e.code === 'Escape' || e.code === 'KeyO') { closeOverlay(); if (race && settingsFromPause) openOverlay('pause', pauseHTML()); return true; }
   else return false;
   panel.innerHTML = settingsHTML(); return true;
 }
@@ -1075,6 +1861,7 @@ function menuShortcut(e) {
   const diff = { KeyR: 'ROOKIE', KeyN: 'NORMAL', KeyP: 'PRO' }[e.code];
   const cam = { KeyF: 'FIXED', KeyC: 'CHASE' }[e.code];
   const ncars = { Digit2: 2, Digit4: 4, Digit6: 6, Digit8: 8, Numpad2: 2, Numpad4: 4, Numpad6: 6, Numpad8: 8 }[e.code];
+  if ((ncars || laps || diff || ['KeyG', 'KeyL', 'KeyQ'].includes(e.code)) && guestLocked()) return true;
   if (ncars) opt.cars = ncars;
   else if (e.code === 'KeyG') opt.grid = { BACK: 'RANDOM', RANDOM: 'POLE', POLE: 'BACK' }[opt.grid];
   else if (e.code === 'KeyL') opt.limits = opt.limits ? 0 : 1;
@@ -1082,6 +1869,7 @@ function menuShortcut(e) {
   else if (laps) opt.laps = laps;
   else if (diff) opt.diff = diff;
   else if (cam) opt.cam = cam;
+  else if (e.code === 'KeyM') { openMp(); return true; }
   else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); return true; }
   else if (e.code === 'KeyH') { openOverlay('help', helpHTML()); return true; }
   else if (e.code === 'KeyV' || e.code === 'KeyT') { if (e.code === 'KeyV') muted = !muted; else musicOff = !musicOff; menuMusic(); refreshMenu(); if (detailOpen) detailInfo(); return true; }
@@ -1091,9 +1879,15 @@ function menuShortcut(e) {
 }
 addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target && e.target.tagName === 'INPUT') {         // the room code box takes its own typing
+    if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); mpAct('go'); }
+    else if (e.code === 'Escape') { e.preventDefault(); mpAct('back'); }
+    return;
+  }
   if (mode === 'menu') {
     let handled = true;
-    if (overlay === 'settings') handled = settingsKeys(e);
+    if (overlay === 'mp') handled = mpKeys(e);
+    else if (overlay === 'settings') handled = settingsKeys(e);
     else if (overlay === 'help') { if (e.code === 'KeyH' || e.code === 'Escape') closeOverlay(); }
     else if (menuShortcut(e)) { /* options changed, selection untouched */ }
     else if (detailOpen) {
@@ -1125,6 +1919,8 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyR') startRace();
     else if (e.code === 'KeyH') openOverlay('help', helpHTML());
     else if (e.code === 'KeyO') { settingsFromPause = true; openSettings(); }
+    else if (e.code === 'KeyF' || e.code === 'KeyC') { opt.cam = e.code === 'KeyF' ? 'FIXED' : 'CHASE'; writeHash(); panel.innerHTML = pauseHTML(); }
+    else if (e.code === 'KeyZ') { tiltRecenter(); toast('TILT RECENTERED · HOLD THE PHONE HOW YOU WANT TO DRIVE'); }
     return;
   }
   if (mode === 'done') {
@@ -1133,7 +1929,7 @@ addEventListener('keydown', e => {
   }
   keys[e.code] = true;
   if (e.code === 'Escape' && race.tt) openOverlay('summary', ttSummaryHTML());
-  else if (e.code === 'Escape' || e.code === 'KeyP') openOverlay('pause', PAUSE_HTML);
+  else if (e.code === 'Escape' || e.code === 'KeyP') openOverlay('pause', pauseHTML());
   else if (e.code === 'KeyH') openOverlay('help', helpHTML());
   else if (e.code === 'KeyO') { settingsFromPause = false; openSettings(); }
   else if (e.code === 'Space') { if (!e.repeat) tryRecover(); }
@@ -1147,18 +1943,113 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 function flash(m) { msg = m; msgT = 1.6; }
+function kbSteer() { return ((keys.ArrowRight || keys.KeyD || touch.r) ? 1 : 0) - ((keys.ArrowLeft || keys.KeyA || touch.l) ? 1 : 0); }
 function playerInput() {
   return {
     thr: (keys.ArrowUp || keys.KeyW || touch.g) ? 1 : 0,
     brk: (keys.ArrowDown || keys.KeyS || touch.b) ? 1 : 0,
-    steer: ((keys.ArrowRight || keys.KeyD || touch.r) ? 1 : 0) - ((keys.ArrowLeft || keys.KeyA || touch.l) ? 1 : 0)
+    steer: kbSteer() || (tiltActive() && performance.now() - tilt.t < 500 ? tilt.steer : 0)
   };
 }
 document.querySelectorAll('#touch [data-t]').forEach(b => {
   const k = b.dataset.t;
-  const on = e => { e.preventDefault(); audioInit(); if (k === 'x') tryRecover(); else touch[k] = 1; }, off = e => { e.preventDefault(); touch[k] = 0; };
+  const on = e => { e.preventDefault(); audioInit(); b.classList.add('down'); if (k === 'x') tryRecover(); else touch[k] = 1; }, off = e => { e.preventDefault(); b.classList.remove('down'); touch[k] = 0; };
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
 });
+
+// ----- tilt steering: the phone's orientation sensor -----
+function tiltActive() { return touchOn && !!opt.tilt && tilt.live && tilt.perm === 'granted'; }
+function tiltEvent(e) {
+  if (e.beta === null || e.gamma === null) { tilt.nNull++; return; }   // desktop browsers send empty events
+  tilt.n++;
+  const scr = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (typeof window.orientation === 'number' ? (window.orientation + 360) % 360 : 0);
+  const a = tiltAngle(e.beta, e.gamma, scr);
+  tilt.flat = a === null;
+  if (a === null) return;                                           // lying flat
+  tilt.live = true; tilt.angle = a; tilt.t = performance.now();
+  if (tilt.needZero) { tilt.zero = a; tilt.needZero = false; tilt.steer = 0; }   // the first reading after a late permission answer is "straight" 
+  tilt.steer += (tiltSteer(a, tilt.zero, opt.tiltRange) - tilt.steer) * 0.6;   // a little smoothing
+}
+function tiltEnsure() {                    // iPhone and iPad ask for motion access, and only from a tap
+  if (tilt.perm !== 'unknown' || typeof DeviceOrientationEvent === 'undefined' || window.isSecureContext === false) return;
+  const D = DeviceOrientationEvent, go = () => { tilt.perm = 'granted'; addEventListener('deviceorientation', tiltEvent); };
+  if (typeof D.requestPermission !== 'function') { go(); return; }
+  tilt.perm = 'asking';
+  D.requestPermission().then(r => { if (r === 'granted') go(); else { tilt.perm = 'denied'; toast('MOTION ACCESS REFUSED · USE THE ARROW BUTTONS'); } }, () => { tilt.perm = 'unknown'; });
+}
+document.addEventListener('click', () => { if (touchOn && opt.tilt) tiltEnsure(); }, true);
+function tiltStatus() {                    // why tilt steering does or does not work, in a few words
+  if (!touchOn) return 'NOT A TOUCH SCREEN';
+  if (!opt.tilt) return 'TURNED OFF IN OPTIONS';
+  if (typeof DeviceOrientationEvent === 'undefined') return 'NO MOTION SENSOR IN THIS BROWSER';
+  if (window.isSecureContext === false) return 'PAGE NOT SECURE · MOTION SENSORS NEED HTTPS';
+  if (tilt.perm === 'unknown') return 'TAP ENABLE MOTION ACCESS';
+  if (tilt.perm === 'asking') return 'WAITING FOR YOUR ANSWER TO THE PROMPT';
+  if (tilt.perm === 'denied') return 'MOTION ACCESS REFUSED · CLOSE AND REOPEN THE BROWSER, THEN ALLOW';
+  if (!tilt.live) return tilt.flat ? 'HOLD THE PHONE UPRIGHT · IT LIES FLAT' : tilt.n ? 'NO USABLE READING' : tilt.nNull ? 'THE PHONE SENDS NO MOTION DATA' : 'NO SENSOR DATA YET · MOVE THE PHONE';
+  return `WORKING · WHEEL ${Math.round(tilt.angle - tilt.zero)}° · STEER ${tilt.steer.toFixed(2)}`;
+}
+function tiltRecenter() { tilt.zero = tilt.angle; tilt.steer = 0; tilt.needZero = !tilt.live; }
+// the on-screen menu button opens the pause box (online: the race keeps running behind it)
+(() => {
+  const b = document.getElementById('tmenu');
+  b.addEventListener('pointerdown', e => { e.preventDefault(); b.classList.add('down'); });
+  b.addEventListener('pointerup', e => { e.preventDefault(); b.classList.remove('down'); if (race && !overlay && mode !== 'menu') dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyP', key: 'p' })); });
+  b.addEventListener('pointercancel', () => b.classList.remove('down'));
+})();
+// pinch on the playfield: zoom in or out one level at a time
+(() => {
+  const pts = new Map(); let base = 0;
+  const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]) || 1; };
+  cv.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') return; pts.set(e.pointerId, [e.clientX, e.clientY]); if (pts.size === 2) base = dist(); });
+  cv.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size !== 2 || !race || mode === 'menu') return;
+    const r = dist() / base;
+    if (r > 1.3 && opt.zoom < 7) { opt.zoom++; writeHash(); flash('ZOOM ' + opt.zoom); base = dist(); }
+    else if (r < 0.77 && opt.zoom > 1) { opt.zoom--; writeHash(); flash('ZOOM ' + opt.zoom); base = dist(); }
+  });
+  const up = e => pts.delete(e.pointerId);
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+})();
+
+// iPhone Safari ignores user-scalable=no and zooms the page on a double tap or a pinch: stop both
+// while racing (a second tap within 350 ms is cancelled; boxes with buttons keep fast taps)
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (mode !== 'menu' && now - lastTouchEnd < 350 && !(e.target.closest && e.target.closest('#panel'))) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+document.addEventListener('touchstart', e => { if (e.touches.length > 1 && e.cancelable) e.preventDefault(); }, { passive: false });
+for (const t of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(t, e => e.preventDefault());
+
+// ---------- version: shown in the menu; a tap drops the offline copy and reloads the latest ----------
+(() => {
+  const v = document.getElementById('ver');
+  v.textContent = 'V' + APP_VERSION;
+  v.onclick = async () => {
+    toast('FETCHING THE LATEST VERSION …');
+    try {
+      if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+      if (window.caches) for (const k of await caches.keys()) await caches.delete(k);
+    } catch (e) { /* reload anyway */ }
+    location.reload();
+  };
+})();
+
+// ---------- install as an app, fullscreen, offline ----------
+let installEvt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; document.getElementById('instbtn').style.display = ''; });
+addEventListener('appinstalled', () => { installEvt = null; document.getElementById('instbtn').style.display = 'none'; });
+document.getElementById('instbtn').onclick = () => { if (installEvt) { installEvt.prompt(); installEvt = null; document.getElementById('instbtn').style.display = 'none'; } };
+const fsBtn = document.getElementById('fsbtn');
+if (document.fullscreenEnabled && !matchMedia('(display-mode: standalone)').matches) {
+  fsBtn.style.display = '';
+  fsBtn.onclick = () => { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen({ navigationUI: 'hide' }); } catch (e) { /* refused */ } };
+}
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 // ---------- render ----------
 function resize() {
@@ -1201,6 +2092,7 @@ function drawWorld(z) {
     if (c.wait > 0 && (performance.now() / 150 | 0) % 2) continue;
     ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.a);
     if (c.isP) { glow(c.hit ? 18 : 10); ctx.strokeStyle = G; ctx.lineWidth = lw * 1.15; }
+    else if (c.human) { glow(7); ctx.strokeStyle = G; ctx.lineWidth = lw; }       // another player
     else { glow(4); ctx.strokeStyle = c.hit ? G : '#2bd10f'; ctx.lineWidth = lw * 0.9; }
     ctx.stroke(CAR);
     ctx.restore();
@@ -1218,7 +2110,7 @@ function drawLabels() {
   glow(4);
   for (const c of race.cars) {
     const p = m.transformPoint(new DOMPoint(c.x, c.y));
-    const s = c.isP ? 'YOU' : String(c.num);
+    const s = c.isP ? 'YOU' : c.name || String(c.num);
     text(s, p.x, p.y - 24 * D, 14, c.isP ? G : GD, 'center');
   }
 }
@@ -1242,13 +2134,14 @@ function drawMinimap() {
   // standings under the minimap
   const st = standings(race.cars);
   glow(3);
-  st.forEach((c, i) => text(`P${i + 1}  ${c.isP ? 'YOU' : 'CAR ' + c.num}${c.fin ? '  FIN' : ''}`, x0, y0 + S + (24 + i * 21) * D, 16, c.isP ? G : GD));
+  st.forEach((c, i) => text(`P${i + 1}  ${carName(c)}${c.fin ? '  FIN' : ''}`, x0, y0 + S + (24 + i * 21) * D, 16, c.isP ? G : GD));
 }
 function drawHUD() {
   const D = DPR * U;
   const P = race.player, st = standings(race.cars), pos = st.indexOf(P) + 1, pad = 16 * D;
   glow(6);
   text(race.track.gp.toUpperCase() + ' · ' + race.track.c.toUpperCase() + ' · ' + (race.track.g === '2026' ? '2026' : race.track.date), pad, pad + 16 * D, 16, GD);
+  if (race.mp) { const g = race.mp.role === 'guest' && mp.guest; text(`ONLINE · ${showCode(race.mp.code)}${g ? ' · PING ' + (g.ping() || '…') + ' MS' : ''}`, W / 2, pad + (touchOn ? 80 : 16) * D, 14, GD, 'center'); }
   if (race.tt) {
     text(`LAP ${Math.max(1, P.lap)}`, pad, pad + 44 * D, 26);
     text('TIME TRIAL', pad, pad + 74 * D, 26);
@@ -1267,22 +2160,29 @@ function drawHUD() {
   if (P.pen) text(`PENALTIES +${P.pen} S`, pad, pad + 180 * D, 16, G);
   const dl = liveDelta(P, race);
   if (dl !== null) { glow(dl < 0 ? 10 : 4); text(`Δ ${dl < 0 ? '−' : '+'}${Math.abs(dl).toFixed(2)}`, pad, pad + 214 * D, 28, dl < 0 ? G : GD); glow(6); }
-  if (P.draft > 0.4 && !P.fin) text('SLIPSTREAM', W / 2, H - pad - 64 * D, 20, G, 'center');
-  if (race.tt && !race.started) { glow(14); text('PRESS ↑ TO START THE CLOCK', W / 2, H * 0.3, 28, G, 'center'); glow(6); }
+  if (P.draft > 0.4 && !P.fin) text('SLIPSTREAM', W / 2, touchOn ? H * 0.66 : H - pad - 64 * D, 20, G, 'center');
+  if (race.tt && !race.started) { glow(14); text(touchOn ? 'PRESS GAS TO START THE CLOCK' : 'PRESS ↑ TO START THE CLOCK', W / 2, H * 0.3, 28, G, 'center'); glow(6); }
   // speed
   const kmh = Math.round(Math.abs(P.f) * 0.75);
-  text(String(kmh).padStart(3, ' '), pad, H - pad - 26 * D, 48);
-  text('KM/H', pad + 92 * D, H - pad - 26 * D, 16, GD);
-  text('GEAR ' + gear, pad + 150 * D, H - pad - 26 * D, 16, GD);
+  // on a touch screen the speedometer moves clear of the on-screen buttons: centred in landscape, raised in portrait
+  const land = W > H * 1.15, sx = touchOn && land ? W / 2 - 110 * D : pad, sy = H - pad - 26 * D - (touchOn && !land ? 112 * DPR : 0);
+  text(String(kmh).padStart(3, ' '), sx, sy, 48);
+  text('KM/H', sx + 92 * D, sy, 16, GD);
+  text('GEAR ' + gear, sx + 150 * D, sy, 16, GD);
   const bw = 220 * D, frac = clamp(Math.abs(P.f) / VMAX, 0, 1);
-  ctx.strokeStyle = GD; ctx.lineWidth = D; ctx.strokeRect(pad, H - pad - 14 * D, bw, 10 * D);
-  for (let i = 0; i < 20; i++) if (i / 20 < frac) { ctx.fillStyle = G; ctx.fillRect(pad + 2 * D + i * (bw - 4 * D) / 20, H - pad - 12 * D, (bw - 4 * D) / 20 - 2 * D, 6 * D); }
+  ctx.strokeStyle = GD; ctx.lineWidth = D; ctx.strokeRect(sx, sy + 12 * D, bw, 10 * D);
+  for (let i = 0; i < 20; i++) if (i / 20 < frac) { ctx.fillStyle = G; ctx.fillRect(sx + 2 * D + i * (bw - 4 * D) / 20, sy + 14 * D, (bw - 4 * D) / 20 - 2 * D, 6 * D); }
+  if (tiltActive() && !P.fin) {                              // wheel indicator: a dot on a line, centre = straight ahead
+    const wx = W / 2, wy = pad + 56 * D, ww = 70 * D, v = playerInput().steer;
+    glow(4); ctx.strokeStyle = GD; ctx.lineWidth = D; ctx.beginPath(); ctx.moveTo(wx - ww, wy); ctx.lineTo(wx + ww, wy); ctx.moveTo(wx, wy - 5 * D); ctx.lineTo(wx, wy + 5 * D); ctx.stroke();
+    glow(8); ctx.fillStyle = G; ctx.beginPath(); ctx.arc(wx + v * ww, wy, 5 * D, 0, 7); ctx.fill(); glow(6);
+  }
   const blink = (performance.now() / 200 | 0) % 2 ? G : GD;
   if (P.wait > 0) { glow(14); text('BACK ON TRACK IN ' + Math.ceil(P.wait), W / 2, H * 0.3, 30, G, 'center'); glow(6); }
-  else if (mode === 'race' && !P.fin && canRecover(P, race.T)) text((P.off ? 'OFF TRACK' : 'WRONG WAY') + ' · SPACE TO RECOVER', W / 2, H - pad - 30 * D, 22, blink, 'center');
+  else if (mode === 'race' && !P.fin && canRecover(P, race.T)) text((P.off ? 'OFF TRACK' : 'WRONG WAY') + (touchOn ? ' · TAP ↺ TO RECOVER' : ' · SPACE TO RECOVER'), W / 2, touchOn ? H * 0.72 : H - pad - 30 * D, 22, blink, 'center');
   if (P.newLap && P.lap === race.laps && !P.fin) text('FINAL LAP', W / 2, H * 0.28, 30, G, 'center');
   if (msgT > 0) text(msg, W / 2, H * 0.18, 18, G, 'center');
-  text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · F/C CAMERA · H HELP · O OPTIONS · P PAUSE · ESC ' + (race.tt ? 'END RUN' : 'MENU'), W / 2, H - 9 * D, 14, GD, 'center');
+  if (!touchOn) text('↑ GAS · ↓ BRAKE · ←→ STEER · SPACE RECOVER · +/- ZOOM ' + opt.zoom + ' · F/C CAMERA · H HELP · O OPTIONS · P PAUSE · ESC ' + (race.tt ? 'END RUN' : 'MENU'), W / 2, H - 9 * D, 14, GD, 'center');
 }
 function drawLights() {
   const D = DPR * U;
@@ -1290,7 +2190,7 @@ function drawLights() {
   const n = mode === 'lights' ? Math.min(5, Math.floor(lightsT / 0.8)) : 0;
   const show = mode === 'lights' || (mode === 'race' && race.t < 1.2);
   if (!show) return;
-  const r = 16 * D, gap = 46 * D, x0 = W / 2 - gap * 2, y = H * 0.16;
+  const gap = Math.min(46 * D, W / 9), r = Math.min(16 * D, gap * 0.36), x0 = W / 2 - gap * 2, y = H * (W < H ? 0.24 : 0.16);   // narrower on a phone held upright
   ctx.lineWidth = 2 * D;
   for (let i = 0; i < 5; i++) {
     ctx.beginPath(); ctx.arc(x0 + i * gap, y, r, 0, 7);
@@ -1333,14 +2233,26 @@ function update(dt) {
     lightsT += dt;
     const after = Math.floor(lightsT / 0.8);
     if (after > before && after <= 5) beep(440, 0.15);
-    if (lightsT >= goAt) { mode = 'race'; race.t = 0; beep(880, 0.35); }
+    tiltRecenter();                                                    // the posture you hold under the lights is straight ahead
+    if (lightsT >= goAt) { mode = 'race'; race.t = 0; beep(880, 0.35); if (touchOn && opt.tilt && !tiltActive()) flash('TILT STEERING NOT ACTIVE · SEE OPTIONS'); }
     return;
   }
   const P0 = race.player; P0.steerLv = opt.steer; P0.brakeLv = opt.brake;
   const inp = playerInput();
-  if (race.tt && !race.started) { if (inp.thr) race.started = true; else { engineUpdate(P0, inp); return; } }
-  const H2 = 1 / 120; acc += dt;
-  while (acc >= H2) { simTick(race, inp, H2); acc -= H2; }
+  if (race.tt && !race.started) { if (inp.thr) race.started = true; else { tiltRecenter(); engineUpdate(P0, inp); return; } }
+  const role = race.mp && race.mp.role, sess = role === 'host' ? mp.host : role === 'guest' ? mp.guest : null;
+  if (role && (!sess || sess.race !== race)) { toMenu(); return; }
+  acc += dt;
+  if (role === 'guest') {
+    sess.pred.s.steerLv = opt.steer; sess.pred.s.brakeLv = opt.brake;
+    while (acc >= SIM_H) { sess.stepLocal(inp); acc -= SIM_H; }
+    sess.frame(dt);
+  } else while (acc >= SIM_H) {
+    if (role) sess.preStep();
+    simTick(race, inp, SIM_H);
+    if (role) sess.postStep();
+    acc -= SIM_H;
+  }
   const P = race.player;
   // events from the simulation
   if (P.limitEvent) { P.limitEvent = false; flash(`TRACK LIMITS · +${LIMIT_PENALTY} S`); beep(220, 0.2); }
@@ -1394,11 +2306,27 @@ function engineUpdate(P, inp) {
   if (gear > prev && !muted) { engG.gain.setTargetAtTime(0.004, now, 0.01); shiftUntil = now + 0.07; }
   else if (now >= shiftUntil) engG.gain.setTargetAtTime(target, now, 0.05);
 }
+let tmenuShown = false, padShown = false, wakeWant = false, wake = null;
+async function wakeSet(on) {                               // keep the screen on while racing
+  try {
+    if (on && !wake && navigator.wakeLock) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); }
+    else if (!on && wake) { const w = wake; wake = null; await w.release(); }
+  } catch (e) { /* not allowed or not supported */ }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && wakeWant) wakeSet(true); });
 function frame(ts) {
   const dt = Math.min(0.05, (ts - (lastTs || ts)) / 1000); lastTs = ts;
   update(dt);
   if (mode !== 'menu') render(dt);
   else if (detailOpen) drawDetail(ts);
+  const racing = mode !== 'menu', showMenuBtn = touchOn && racing && !overlay;
+  if (racing !== wakeWant) { wakeWant = racing; wakeSet(racing); }
+  if (overlay === 'settings' && touchOn) { const el = document.getElementById('tiltstat'); if (el) el.textContent = 'TILT · ' + tiltStatus(); }
+  const tiltNow = tiltActive();
+  if (tiltNow !== tilt.on) { tilt.on = tiltNow; document.body.classList.toggle('tilt', tiltNow); }
+  const showPad = touchOn && racing;
+  if (showPad !== padShown) { padShown = showPad; document.getElementById('touch').style.display = showPad ? 'block' : 'none'; }
+  if (showMenuBtn !== tmenuShown) { tmenuShown = showMenuBtn; document.getElementById('tmenu').style.display = showMenuBtn ? 'flex' : 'none'; }
   if (mode === 'lights' && engG) engG.gain.setTargetAtTime(muted ? 0 : 0.012, AC.currentTime, 0.1);
   requestAnimationFrame(frame);
 }
@@ -1407,7 +2335,10 @@ resize();
 buildMenu();
 writeHash();
 menuMusic();
-if (matchMedia('(pointer:coarse)').matches) document.getElementById('touch').style.display = 'block';
+if (initialJoin) setTimeout(() => mpJoin(initialJoin), 0);
+setTouch(matchMedia('(pointer:coarse)').matches);
+if (touchOn && opt.tilt && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') tiltEnsure();   // Android: no prompt
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !touchOn) setTouch(true); }, true);   // a touch screen on a laptop
 requestAnimationFrame(frame);
 </script>
 </body>

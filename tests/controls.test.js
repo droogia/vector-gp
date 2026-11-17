@@ -10,7 +10,7 @@ test('URL code: readable round trip for every option', () => {
   for (const track of ['AUS', 'MON', 'IMO']) for (const laps of [1, 3, 5, 10]) for (const diff of ['ROOKIE', 'NORMAL', 'PRO'])
     for (const cam of ['FIXED', 'CHASE']) for (let steer = 1; steer <= 5; steer += 2) for (const zoom of [1, 7])
     for (const cars of [2, 4, 6, 8]) for (const grid of ['BACK', 'RANDOM', 'POLE']) for (const limits of [0, 1]) for (const mode of ['RACE', 'TT']) for (const ghost of [0, 1]) {
-      const o = { track, laps, diff, cam, steer, brake: 6 - steer, zoom, cars, grid, limits, mode, ghost };
+      const o = { track, laps, diff, cam, steer, brake: 6 - steer, zoom, cars, grid, limits, mode, ghost, tilt: cars === 4 ? 0 : 1, tiltRange: [1, 3, 5][(zoom + steer) % 3] };
       assert.deepStrictEqual(plain(decodeSettings('#' + encodeSettings(o), TRACKS)), o);
     }
   assert.strictEqual(encodeSettings(SETTINGS_DEFAULT), 'AUS-L3-N-F-S3-B3-Z7-C4-GB');

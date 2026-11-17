@@ -7,7 +7,7 @@ function loadCore() {
   const html = fs.readFileSync(path.join(__dirname, '..', '..', 'vector-gp.html'), 'utf8');
   const script = html.split('<script>')[1].split('</script>')[0];
   const core = script.split('// ===== UI')[0];   // tracks, core, music data
-  return vm.runInNewContext(core + '\n({ TRACKS, SCORES, makeField, liveDelta, ghostAt, lapTime, raceTime, LIMIT_PENALTY, DRAFT_GAIN, TRACK_MUSIC, parseScore, trackMusic, buildTrack, makeCar, simTick, standings, recover, canRecover, encodeSettings, decodeSettings, SETTINGS_DEFAULT, RECOVER_WAIT, REVERSE_DELAY, HALF, WALL, K_SCALE, STEP });');
+  return vm.runInNewContext(core + '\n({ TRACKS, SCORES, DIFF, tiltAngle, tiltSteer, TILT_RANGE, TILT_DEAD, makeField, planField, buildField, makeMpRace, cleanCfg, cleanPlan, newCode, normCode, showCode, hashSeed, mulberry32, packIn, unpackIn, packCar, feedInputs, pushInputs, carName, HostSession, GuestSession, Predictor, SIM_H, INTERP, SNAP_EVERY, MAX_HUMANS, aiControl, liveDelta, ghostAt, lapTime, raceTime, LIMIT_PENALTY, DRAFT_GAIN, TRACK_MUSIC, parseScore, trackMusic, buildTrack, makeCar, simTick, standings, recover, canRecover, encodeSettings, decodeSettings, SETTINGS_DEFAULT, RECOVER_WAIT, REVERSE_DELAY, HALF, WALL, K_SCALE, STEP });');
 }
 
 // Runs a race with all cars AI-driven; returns stats.
