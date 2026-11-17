@@ -1,10 +1,11 @@
 {
   "name": "vector-gp",
-  "version": "3.0.0",
+  "version": "3.2.1",
   "description": "Single-file HTML top-down F1 racing game with an 80s monochrome vector look: 2026 calendar plus past championship circuits.",
   "private": true,
   "scripts": {
-    "test": "node --test \"tests/**/*.test.js\""
+    "test": "node --test \"tests/**/*.test.js\"",
+    "serve": "python3 tools/serve.py"
   },
   "engines": {
     "node": ">=22.2"
